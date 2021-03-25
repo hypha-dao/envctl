@@ -65,6 +65,7 @@ var populatePretendCmd = &cobra.Command{
 			return fmt.Errorf("cannot retrieve default settings for pretend environment: %v ", err)
 		}
 		for _, setting := range settings {
+			fmt.Println("Setting a setting. Key: " + setting.Label + " Value: " + setting.Value.String())
 			_, err = dao.SetSetting(e.E().X, e.E().A, e.E().Contract, setting.Label, setting.Value)
 			if err != nil {
 				return fmt.Errorf("cannot set setting: %v ", err)
