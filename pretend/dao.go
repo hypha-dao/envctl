@@ -10,7 +10,7 @@ func PayPeriodDuration() time.Duration {
 	if viper.InConfig("PayPeriodDuration") {
 		return viper.GetDuration("PayPeriodDuration")
 	}
-	d, _ := time.ParseDuration("5h") // default to 5h
+	d, _ := time.ParseDuration("5m") // default to 5h
 	return d
 }
 

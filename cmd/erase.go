@@ -68,21 +68,8 @@ func eraseAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountNa
 	fmt.Println("\nErasing documents: " + strconv.Itoa(len(documents)))
 	bar := e.DefaultProgressBar(len(documents), "erasing documents...")
 
-	// docType := eos.Name("unknown")
 	for _, document := range documents {
 
-		// typeFV, err := document.GetContent("type")
-		// if err != nil {
-		// 	docType = eos.Name("unknown")
-		// } else {
-		// 	docType = typeFV.Impl.(eos.Name)
-		// }
-
-		// if docType == eos.Name("settings") ||
-		// 	docType == eos.Name("dho") {
-		// 	// do not erase
-		// 	fmt.Println("\nSkipping document because type of " + string(docType) + " : " + document.Hash.String())
-		// } else {
 		actions := []*eos.Action{{
 			Account: contract,
 			Name:    eos.ActN("erasedoc"),
@@ -100,7 +87,6 @@ func eraseAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountNa
 			fmt.Println(err)
 		} else {
 			time.Sleep(e.E().Pause)
-			// }
 		}
 		bar.Add(1)
 	}

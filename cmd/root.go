@@ -41,7 +41,7 @@ Contract: dao.hypha
 UserAccount: johnnyhypha1
 Pause: 1s
 VotingPeriodDuration: 30s
-PayPeriodDuration: 5h
+PayPeriodDuration: 5m
 global-expiration: 10
 RootHash: 52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91
 PrivateKey: xxx
@@ -60,7 +60,7 @@ var RootCmd = &cobra.Command{
 // Execute executes the configured RootCmd
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		zap.S().DPanic(err)
 		os.Exit(1)
 	}
 }
@@ -74,7 +74,6 @@ func init() {
 
 func networkWarning() {
 	colorRed := "\033[31m"
-	colorCyan := "\033[36m"
 	colorReset := "\033[0m"
 	info, err := e.E().A.GetInfo(context.Background())
 	if err != nil {
@@ -83,11 +82,11 @@ func networkWarning() {
 
 	if hex.EncodeToString(info.ChainID) == mainnetChainId {
 		fmt.Println(string(colorRed) + "\nERROR: Endpoint is connected to the Telos mainnet - cannot run envctl there. Please change your EOSIO endpoint configuration.")
+		fmt.Println(string(colorReset))
 		os.Exit(1)
 	} else if hex.EncodeToString(info.ChainID) == testnetChainId {
-		fmt.Println(string(colorCyan) + "\nNETWORK: Connecting to the Test Network")
+		zap.S().Info("\nNETWORK: Connecting to the Test Network")
 	}
-	fmt.Println(string(colorReset))
 }
 
 func initConfig() {
@@ -97,7 +96,7 @@ func initConfig() {
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
-			zlog.Warn("Cannot find home directory looking for config file", zap.Error(err))
+			zap.S().Warn("Cannot find home directory looking for config file", zap.Error(err))
 		}
 		viper.SetConfigType("yaml")
 		viper.AddConfigPath(".")
@@ -113,17 +112,17 @@ func initConfig() {
 	recurseViperCommands(RootCmd, nil)
 
 	if err := viper.ReadInConfig(); err == nil {
-		zlog.Debug("Using config file", zap.String("config-file", viper.ConfigFileUsed()))
+		zap.S().Debug("Using config file", zap.String("config-file", viper.ConfigFileUsed()))
 	} else {
 		err := viper.ReadConfig(bytes.NewBuffer(yamlDefault))
 		if err != nil {
-			zlog.Fatal("No configuration file and error reading default config", zap.Error(err))
+			zap.S().Fatal("No configuration file and error reading default config", zap.Error(err))
 		}
 	}
 
 	e := e.E()
 	if e == nil {
-		zlog.Fatal("unable to configure environment - E() is nil")
+		zap.S().Fatal("unable to configure environment - E() is nil")
 	}
 	networkWarning()
 	SetupLogger()
@@ -140,14 +139,14 @@ func recurseViperCommands(root *cobra.Command, segments []string) {
 		newVar := segmentPrefix + "global-" + f.Name
 		err := viper.BindPFlag(newVar, f)
 		if err != nil {
-			zlog.Error("Cannot bind PFlags to variables", zap.Error(err))
+			zap.S().Error("Cannot bind PFlags to variables", zap.Error(err))
 		}
 	})
 	root.Flags().VisitAll(func(f *pflag.Flag) {
 		newVar := segmentPrefix + "cmd-" + f.Name
 		err := viper.BindPFlag(newVar, f)
 		if err != nil {
-			zlog.Error("Cannot bind PFlags to variables", zap.Error(err))
+			zap.S().Error("Cannot bind PFlags to variables", zap.Error(err))
 		}
 	})
 

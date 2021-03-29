@@ -118,24 +118,19 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 	}
 	fmt.Println("Retrieved proposal document to close: " + proposal.Hash.String())
 
-	ballot, err := proposal.GetContent("ballot_id")
-	if err != nil {
-		return docgraph.Document{}, fmt.Errorf("error retrieving ballot %v", err)
-	}
-
-	_, err = dao.TelosDecideVote(ctx, api, telosDecide, member, ballot.Impl.(eos.Name), eos.Name("pass"))
+	_, err = dao.VotePass(ctx, api, contract, telosDecide, member, &proposal)
 	if err == nil {
 		fmt.Println("Member voted : " + string(member))
 	}
 	e.DefaultPause("Building a block...")
 
-	_, err = dao.TelosDecideVote(ctx, api, telosDecide, eos.AN("alice"), ballot.Impl.(eos.Name), eos.Name("pass"))
+	_, err = dao.VotePass(ctx, api, contract, telosDecide, eos.AN("alice"), &proposal)
 	if err == nil {
 		fmt.Println("Member voted : alice")
 	}
 	e.DefaultPause("Building a block...")
 
-	_, err = dao.TelosDecideVote(ctx, api, telosDecide, eos.AN("johnnyhypha1"), ballot.Impl.(eos.Name), eos.Name("pass"))
+	_, err = dao.VotePass(ctx, api, contract, telosDecide, eos.AN("johnnyhypha1"), &proposal)
 	if err == nil {
 		fmt.Println("Member voted : johnnyhypha1")
 	}
@@ -147,9 +142,9 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 		memberNameIn := "mem" + strconv.Itoa(index) + ".hypha"
 		//memberNameIn := "member" + strconv.Itoa(index)
 
-		_, err := dao.TelosDecideVote(ctx, api, telosDecide, eos.AN(memberNameIn), ballot.Impl.(eos.Name), eos.Name("pass"))
+		_, err = dao.VotePass(ctx, api, contract, telosDecide, eos.AN(memberNameIn), &proposal)
 		if err != nil {
-			return docgraph.Document{}, fmt.Errorf("error voting via telos decide %v", err)
+			return docgraph.Document{}, fmt.Errorf("error voting %v", err)
 		}
 		e.DefaultPause("Waiting for a period to lapse")
 		fmt.Println("Member voted : " + string(memberNameIn))
@@ -175,6 +170,7 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 		return docgraph.Document{}, fmt.Errorf("cannot close proposal %v", err)
 	}
 
+	e.DefaultPause("Building a block...")
 	passedProposal, err := docgraph.GetLastDocumentOfEdge(ctx, api, contract, eos.Name("passedprops"))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("error retrieving passed proposal document %v", err)
