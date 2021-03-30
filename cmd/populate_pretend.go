@@ -45,6 +45,7 @@ var populatePretendCmd = &cobra.Command{
 	Long:  "populates with the known Pretend environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
+		e.DefaultPause("Warming up...")
 		_, err := dao.CreateRoot(e.E().X, e.E().A, e.E().Contract)
 		if err != nil {
 			return fmt.Errorf("cannot create root document for pretend environment: %v ", err)
@@ -104,19 +105,21 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to create role: %v", err)
 	}
 	fmt.Println("Role document successfully created	: ", role.Hash.String())
+	e.DefaultPause("Building a block...")
 
 	roleAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("role"), eos.Name("assignment"), []byte(pretend.Assignment))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create assignment: %v", err)
 	}
 	fmt.Println("Created role assignment document	: ", roleAssignment.Hash.String())
-
-	e.Pause(pretend.PayPeriodDuration(), "", "Waiting for a period to lapse")
+	e.Pause(pretend.PayPeriodDuration()+e.E().Pause, "", "Waiting for a period to lapse")
 
 	_, err = daobot.ClaimNextPeriod(ctx, api, contract, member, roleAssignment)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to claim pay on assignment: %v %v", roleAssignment.Hash.String(), err)
 	}
+	fmt.Println("Claimed pay on the assignment 		: ", roleAssignment.Hash.String())
+	e.DefaultPause("Building a block...")
 
 	payAmt, _ := eos.NewAssetFromString("1000.00 USD")
 	payout, err := daobot.CreatePayout(ctx, api, contract, telosDecide, member, member, payAmt, 50, []byte(pretend.Payout))
@@ -124,17 +127,20 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to create payout: %v", err)
 	}
 	fmt.Println("Created payout document	: ", payout.Hash.String())
+	e.DefaultPause("Building a block...")
 
 	badge, err := daobot.CreateBadge(ctx, api, contract, telosDecide, member, []byte(pretend.Badge))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create badge: %v", err)
 	}
 	fmt.Println("Created badge document	: ", badge.Hash.String())
+	e.DefaultPause("Building a block...")
 
 	badgeAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("badge"), eos.Name("assignbadge"), []byte(pretend.BadgeAssignment))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create badge assignment: %v", err)
 	}
 	fmt.Println("Created badge assignment document	: ", badgeAssignment.Hash.String())
+
 	return roleAssignment, nil
 }

@@ -81,7 +81,7 @@ func eraseAllDocuments(ctx context.Context, api *eos.API, contract eos.AccountNa
 			}),
 		}}
 
-		_, err := Exec(ctx, api, actions)
+		_, err := e.ExecWithRetry(ctx, api, actions)
 		if err != nil {
 			fmt.Println("\nFailed to erase : ", document.Hash.String())
 			fmt.Println(err)
@@ -119,7 +119,7 @@ func eraseAllEdges(ctx context.Context, api *eos.API, contract eos.AccountName) 
 			}),
 		}}
 
-		_, err := Exec(ctx, api, actions)
+		_, err := e.ExecWithRetry(ctx, api, actions)
 		if err != nil {
 			fmt.Println("\nFailed to erase : ", strconv.Itoa(int(edge.ID)))
 			fmt.Println(err)

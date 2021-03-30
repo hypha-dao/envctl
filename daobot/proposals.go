@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"time"
 
-	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
 	dao "github.com/hypha-dao/dao-contracts/dao-go"
 	"github.com/hypha-dao/document-graph/docgraph"
@@ -100,11 +99,12 @@ func proposeAndPass(ctx context.Context, api *eos.API,
 		},
 		ActionData: eos.NewActionData(proposal)}}
 
-	trxID, err := eostest.ExecTrx(ctx, api, actions)
+	trxID, err := e.ExecWithRetry(ctx, api, actions)
 	if err != nil {
-		return docgraph.Document{}, fmt.Errorf("error proposeAndPass %v", err)
+		return docgraph.Document{}, fmt.Errorf("error proposeAndPass: %v", err)
 	}
 	fmt.Println("Proposed. Transaction ID: " + trxID)
+	e.DefaultPause("Building a block...")
 
 	return closeLastProposal(ctx, api, contract, telosDecide, proposer)
 }
@@ -146,7 +146,7 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 		if err != nil {
 			return docgraph.Document{}, fmt.Errorf("error voting %v", err)
 		}
-		e.DefaultPause("Waiting for a period to lapse")
+		e.DefaultPause("Building a block...")
 		fmt.Println("Member voted : " + string(memberNameIn))
 		index++
 	}

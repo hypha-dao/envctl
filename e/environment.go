@@ -2,7 +2,9 @@ package e
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,13 +18,21 @@ import (
 )
 
 type Environment struct {
-	A           *eos.API
-	X           context.Context
-	AppName     string
-	Contract    eos.AccountName
-	TelosDecide eos.AccountName
-	User        eos.AccountName
-	Pause       time.Duration
+	A             *eos.API
+	X             context.Context
+	AppName       string
+	Contract      eos.AccountName
+	TelosDecide   eos.AccountName
+	User          eos.AccountName
+	Pause         time.Duration
+	DAO           eos.AccountName
+	HusdToken     eos.AccountName
+	HyphaToken    eos.AccountName
+	HvoiceToken   eos.AccountName
+	Bank          eos.AccountName
+	Events        eos.AccountName
+	Members       []eos.AccountName
+	GenesisHVOICE int64
 }
 
 var once sync.Once
@@ -31,11 +41,14 @@ var Env *Environment
 func E() *Environment {
 	onceBody := func() {
 
+		setDefaults()
+
 		Env = &Environment{
 			A:           eos.New(viper.GetString("EosioEndpoint")),
 			X:           context.Background(),
 			AppName:     viper.GetString("AppName"),
 			Contract:    eos.AN(viper.GetString("Contract")),
+			DAO:         eos.AN(viper.GetString("DAO")),
 			TelosDecide: eos.AN("trailservice"),
 			User:        eos.AN(viper.GetString("UserAccount")),
 			Pause:       viper.GetDuration("Pause"),
@@ -51,6 +64,23 @@ func E() *Environment {
 	}
 	once.Do(onceBody)
 	return Env
+}
+
+func setDefaults() {
+	viper.SetDefault("Contract", "dao.hypha")
+	viper.SetDefault("DAO", "dao.hypha")
+	viper.SetDefault("HusdToken", "husd.hypha")
+	viper.SetDefault("HyphaToken", "token.hypha")
+	viper.SetDefault("HvoiceToken", "voice.hypha")
+	viper.SetDefault("Bank", "bank.hypha")
+	viper.SetDefault("Events", "publsh.hypha")
+	viper.SetDefault("Pause", "1s")
+	viper.SetDefault("VotingPeriodDuration", "30s")
+	viper.SetDefault("PayPeriodDuration", "5m")
+	viper.SetDefault("RootHash", "52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91")
+	viper.SetDefault("EosioEndpoint", "http://localhost:8888")
+	viper.SetDefault("DAOHome", "../dao-contracts")
+	viper.SetDefault("PublicKey", eostest.DefaultKey())
 }
 
 func DefaultProgressBar(counter int, prefix string) *progressbar.ProgressBar {
@@ -123,4 +153,41 @@ func DefaultPause(headline string) {
 	}
 	fmt.Println()
 	fmt.Println()
+}
+
+func ExecWithRetry(ctx context.Context, api *eos.API, actions []*eos.Action) (string, error) {
+	trxId, err := Exec(ctx, api, actions)
+	if err != nil && strings.Contains(err.Error(), "deadline exceeded") {
+		attempts := 1
+		for attempts < 3 {
+			trxId, err = Exec(ctx, api, actions)
+			if err == nil {
+				return trxId, nil
+			}
+			attempts++
+		}
+		return string(""), err
+	}
+	return trxId, nil
+}
+
+func Exec(ctx context.Context, api *eos.API, actions []*eos.Action) (string, error) {
+	txOpts := &eos.TxOptions{}
+	if err := txOpts.FillFromChain(ctx, api); err != nil {
+		return string(""), fmt.Errorf("error filling tx opts: %s", err)
+	}
+
+	tx := eos.NewTransaction(actions, txOpts)
+
+	_, packedTx, err := api.SignTransaction(ctx, tx, txOpts.ChainID, eos.CompressionNone)
+	if err != nil {
+		return string(""), fmt.Errorf("error signing transaction: %s", err)
+	}
+
+	response, err := api.PushTransaction(ctx, packedTx)
+	if err != nil {
+		return string(""), fmt.Errorf("error pushing transaction: %s", err)
+	}
+	trxID := hex.EncodeToString(response.Processed.ID)
+	return trxID, nil
 }

@@ -35,7 +35,7 @@ var Version string
 var cfgFile string
 
 var yamlDefault = []byte(`
-EosioEndpoint: https://test.telos.kitchen
+#EosioEndpoint: https://test.telos.kitchen
 AssetsAsFloat: true
 Contract: dao.hypha
 UserAccount: johnnyhypha1
