@@ -41,8 +41,6 @@ var Env *Environment
 func E() *Environment {
 	onceBody := func() {
 
-		setDefaults()
-
 		Env = &Environment{
 			A:           eos.New(viper.GetString("EosioEndpoint")),
 			X:           context.Background(),
@@ -64,23 +62,6 @@ func E() *Environment {
 	}
 	once.Do(onceBody)
 	return Env
-}
-
-func setDefaults() {
-	viper.SetDefault("Contract", "dao.hypha")
-	viper.SetDefault("DAO", "dao.hypha")
-	viper.SetDefault("HusdToken", "husd.hypha")
-	viper.SetDefault("HyphaToken", "token.hypha")
-	viper.SetDefault("HvoiceToken", "voice.hypha")
-	viper.SetDefault("Bank", "bank.hypha")
-	viper.SetDefault("Events", "publsh.hypha")
-	viper.SetDefault("Pause", "1s")
-	viper.SetDefault("VotingPeriodDuration", "30s")
-	viper.SetDefault("PayPeriodDuration", "5m")
-	viper.SetDefault("RootHash", "52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91")
-	viper.SetDefault("EosioEndpoint", "http://localhost:8888")
-	viper.SetDefault("DAOHome", "../dao-contracts")
-	viper.SetDefault("PublicKey", eostest.DefaultKey())
 }
 
 func DefaultProgressBar(counter int, prefix string) *progressbar.ProgressBar {
@@ -157,14 +138,19 @@ func DefaultPause(headline string) {
 
 func ExecWithRetry(ctx context.Context, api *eos.API, actions []*eos.Action) (string, error) {
 	trxId, err := Exec(ctx, api, actions)
-	if err != nil && strings.Contains(err.Error(), "deadline exceeded") {
-		attempts := 1
-		for attempts < 3 {
-			trxId, err = Exec(ctx, api, actions)
-			if err == nil {
-				return trxId, nil
+
+	if err != nil {
+		if !strings.Contains(err.Error(), "deadline exceeded") {
+			return string(""), err
+		} else {
+			attempts := 1
+			for attempts < 3 {
+				trxId, err = Exec(ctx, api, actions)
+				if err == nil {
+					return trxId, nil
+				}
+				attempts++
 			}
-			attempts++
 		}
 		return string(""), err
 	}

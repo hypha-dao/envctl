@@ -36,6 +36,7 @@ import (
 	"github.com/hypha-dao/envctl/e"
 	"github.com/hypha-dao/envctl/pretend"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // populatePretendCmd populates the environment with the known Pretend environment
@@ -60,6 +61,7 @@ var populatePretendCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("cannot set int setting for pretend environment: %v ", err)
 		}
+		fmt.Println("Set setting: voting_duration_sec	: ", int64(pretend.VotingPeriodDuration().Round(time.Second))/1000000000)
 
 		settings, err := pretend.DefaultSettings()
 		if err != nil {
@@ -73,8 +75,8 @@ var populatePretendCmd = &cobra.Command{
 			}
 		}
 
-		fmt.Println("Adding "+strconv.Itoa(20)+" periods with duration 		: ", pretend.PayPeriodDuration())
-		_, err = dao.AddPeriods(e.E().X, e.E().A, e.E().Contract, root.Hash, 20, pretend.PayPeriodDuration())
+		fmt.Println("Adding "+strconv.Itoa(viper.GetInt("PeriodCount"))+" periods with duration 		: ", pretend.PayPeriodDuration())
+		_, err = dao.AddPeriods(e.E().X, e.E().A, e.E().Contract, root.Hash, viper.GetInt("PeriodCount"), pretend.PayPeriodDuration())
 		if err != nil {
 			return fmt.Errorf("cannot add periods: %v ", err)
 		}

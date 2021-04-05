@@ -22,6 +22,7 @@ import (
 	"os"
 	"strings"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -35,13 +36,14 @@ var Version string
 var cfgFile string
 
 var yamlDefault = []byte(`
-#EosioEndpoint: https://test.telos.kitchen
+#EosioEndpoint: https://te
 AssetsAsFloat: true
 Contract: dao.hypha
 UserAccount: johnnyhypha1
 Pause: 1s
-VotingPeriodDuration: 30s
-PayPeriodDuration: 5m
+VotingPeriodDuration: 15m
+PayPeriodDuration: 1h
+PeriodCount: 40
 global-expiration: 10
 RootHash: 52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91
 PrivateKey: xxx
@@ -90,6 +92,22 @@ func networkWarning() {
 }
 
 func initConfig() {
+
+	viper.SetDefault("Contract", "dao.hypha")
+	viper.SetDefault("DAO", "dao.hypha")
+	viper.SetDefault("HusdToken", "husd.hypha")
+	viper.SetDefault("HyphaToken", "token.hypha")
+	viper.SetDefault("HvoiceToken", "voice.hypha")
+	viper.SetDefault("Bank", "bank.hypha")
+	viper.SetDefault("Events", "publsh.hypha")
+	viper.SetDefault("Pause", "1s")
+	viper.SetDefault("VotingPeriodDuration", "16m")
+	viper.SetDefault("PayPeriodDuration", "1h")
+	viper.SetDefault("RootHash", "52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91")
+	viper.SetDefault("EosioEndpoint", "http://localhost:8888")
+	viper.SetDefault("DAOHome", "../dao-contracts")
+	viper.SetDefault("PublicKey", eostest.DefaultKey())
+
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -105,12 +123,6 @@ func initConfig() {
 		viper.SetConfigName(appName)
 	}
 
-	viper.SetEnvPrefix("ENVCTL")
-	viper.AutomaticEnv()
-	replacer := strings.NewReplacer("-", "_")
-	viper.SetEnvKeyReplacer(replacer)
-	recurseViperCommands(RootCmd, nil)
-
 	if err := viper.ReadInConfig(); err == nil {
 		zap.S().Debug("Using config file", zap.String("config-file", viper.ConfigFileUsed()))
 	} else {
@@ -120,6 +132,13 @@ func initConfig() {
 		}
 	}
 
+	viper.SetEnvPrefix("ENVCTL")
+	viper.AutomaticEnv()
+	replacer := strings.NewReplacer("-", "_")
+	viper.SetEnvKeyReplacer(replacer)
+	recurseViperCommands(RootCmd, nil)
+
+	fmt.Println("\nAll viper settings: ", viper.AllSettings())
 	e := e.E()
 	if e == nil {
 		zap.S().Fatal("unable to configure environment - E() is nil")
