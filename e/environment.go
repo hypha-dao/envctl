@@ -8,15 +8,22 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dfuse-io/logging"
 	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/hypha-dao/envctl/service"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
+	"go.uber.org/zap"
 
 	"github.com/eoscanada/eos-go"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
+
+var zlog *zap.Logger
+
+func init() {
+	logging.Register("github.com/hypha-dao/envctl/e", &zlog)
+}
 
 type Environment struct {
 	A             *eos.API
@@ -60,7 +67,7 @@ func E() *Environment {
 		Env.A.SetSigner(keyBag)
 		EOS = service.NewEOS(Env.A)
 
-		zap.S().Debug("Configured Environment object with sync.Once.Do")
+		zlog.Debug("Configured Environment object with sync.Once.Do")
 	}
 	once.Do(onceBody)
 	return Env
