@@ -35,7 +35,6 @@ import (
 	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 // initCmd represents the erase command
@@ -270,14 +269,14 @@ func deployAndCreateToken(ctx context.Context, api *eos.API, tokenHome string,
 	return e.ExecWithRetry(ctx, api, actions)
 }
 
-func toPublic(privateKey string) ecc.PublicKey {
+func toPublic(privateKey string) (ecc.PublicKey, error) {
 
 	key, err := ecc.NewPrivateKey(privateKey)
 	if err != nil {
-		zap.S().Fatalf("privateKey parameter is not a valid format: %s", err)
+		return ecc.PublicKey{}, fmt.Errorf("privateKey parameter is not a valid format: %s", err)
 	}
 
-	return key.PublicKey()
+	return key.PublicKey(), nil
 }
 
 func init() {
