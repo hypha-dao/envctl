@@ -5,12 +5,12 @@ go 1.16
 require (
 	github.com/bronze1man/go-yaml2json v0.0.0-20150129175009-f6f64b738964
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
-	github.com/digital-scarcity/eos-go-test v0.0.0-20210330215538-8bd2f83c706a
+	github.com/digital-scarcity/eos-go-test v0.0.0-20210402180605-db8bc7b54896
 	github.com/eoscanada/eos-go v0.9.1-0.20200805141443-a9d5402a7bc5
 	github.com/eoscanada/eosc v1.4.0
-	github.com/hypha-dao/dao-contracts/dao-go v0.0.0-20210323131703-3cf67485fa79
-	github.com/hypha-dao/daoctl v0.4.2-0.20210318181659-cc9a9152a1a5
-	github.com/hypha-dao/document-graph/docgraph v0.0.0-20210301235139-24626f87a02a
+	github.com/hypha-dao/dao-contracts/dao-go v0.0.0-20210408021016-878ebc6d5d0d
+	github.com/hypha-dao/daoctl v0.4.2-0.20210408023659-31ca5bcb62c4
+	github.com/hypha-dao/document-graph/docgraph v0.0.0-20210408001022-43385207b5d0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
@@ -24,8 +24,8 @@ require (
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 )
 
-replace github.com/hypha-dao/dao-contracts/dao-go => ../dao-contracts/dao-go
+// replace github.com/hypha-dao/dao-contracts/dao-go => ../dao-contracts/dao-go
 
-replace github.com/hypha-dao/document-graph/docgraph => ../dao-contracts/document-graph/docgraph
+// replace github.com/hypha-dao/document-graph/docgraph => ../dao-contracts/document-graph/docgraph
 
-replace github.com/digital-scarcity/eos-go-test => ../../digital-scarcity/eos-go-test
+// replace github.com/digital-scarcity/eos-go-test => ../../digital-scarcity/eos-go-test

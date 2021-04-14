@@ -9,6 +9,7 @@ import (
 	"time"
 
 	eostest "github.com/digital-scarcity/eos-go-test"
+	"github.com/hypha-dao/envctl/service"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
 
@@ -37,6 +38,7 @@ type Environment struct {
 
 var once sync.Once
 var Env *Environment
+var EOS *service.EOS
 
 func E() *Environment {
 	onceBody := func() {
@@ -51,12 +53,12 @@ func E() *Environment {
 			User:        eos.AN(viper.GetString("UserAccount")),
 			Pause:       viper.GetDuration("Pause"),
 		}
-
 		keyBag := &eos.KeyBag{}
 		keyBag.ImportPrivateKey(context.Background(), "5KCZ9VBJMMiLaAY24Ro66mhx4vU1VcJELZVGrJbkUBATyqxyYmj")
 		keyBag.ImportPrivateKey(context.Background(), "5HwnoWBuuRmNdcqwBzd1LABFRKnTk2RY2kUMYKkZfF8tKodubtK")
 		keyBag.ImportPrivateKey(context.Background(), eostest.DefaultKey())
 		Env.A.SetSigner(keyBag)
+		EOS = service.NewEOS(Env.A)
 
 		zap.S().Debug("Configured Environment object with sync.Once.Do")
 	}

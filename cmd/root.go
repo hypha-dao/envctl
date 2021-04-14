@@ -92,6 +92,7 @@ func networkWarning() {
 }
 
 func initConfig() {
+	SetupLogger()
 
 	viper.SetDefault("Contract", "dao.hypha")
 	viper.SetDefault("DAO", "dao.hypha")
@@ -143,8 +144,9 @@ func initConfig() {
 	if e == nil {
 		zap.S().Fatal("unable to configure environment - E() is nil")
 	}
-	networkWarning()
-	SetupLogger()
+
+	//networkWarning()
+	//fmt.Println("Configured env")
 }
 
 func recurseViperCommands(root *cobra.Command, segments []string) {

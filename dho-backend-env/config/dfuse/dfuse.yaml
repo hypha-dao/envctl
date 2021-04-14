@@ -1,0 +1,39 @@
+start:
+  args:
+  - merger
+  - mindreader
+  - blockmeta
+  - relayer
+  - firehose
+  - node-manager
+  flags:
+    # Common configuration
+    log-to-file: false
+    common-blocks-store-url: /dfuse-data/blocks/merged
+    common-oneblock-store-url: /dfuse-data/blocks/one
+
+    # The gRPC endpoint Mindreader listens to for real-time blocks stream (`dfuse.bstream.v1.BlockStream` service)
+    # mindreader-grpc-listen-addr: :9901
+    # Mindreader configuration (`mindreader-nodeos-api-addr` must first Nodeos config defined in `./mindreader/config.ini`)
+    mindreader-manager-api-addr: :8080
+    mindreader-nodeos-api-addr: localhost:8889
+    mindreader-config-dir: /config/mindreader
+    #mindreader-readiness-max-latency: 5s
+    mindreader-snapshot-store-url: /dfuse-data/snapshots
+    #mindreader-bootstrap-snapshot-name: snapshot-05e08caba3fd89aef6e2d3de00df19427ec0a103b31c34859b053dda9be65b99.bin
+    mindreader-merge-threshold-block-age: 2h
+    mindreader-blocks-chan-capacity: 100000
+    mindreader-start-failure-handler: false
+    mindreader-log-to-zap: true
+    mindreader-shutdown-delay: 20s
+    #mindreader-start-block-num: 97690200
+
+    ## Merger configuration
+    # The gRPC endpoint Merger listens to for pending merge blocks stream (`dfuse.merger.v1.Merger` service)
+    # merger-grpc-listen-addr: :9902
+    # If there is more one blocks file than this value, the merger will refuse to merge one blocks into a bundle
+    merger-max-one-block-operations-batch-size: 50000
+    firehose-grpc-listen-addr: ":9000*"
+    node-manager-config-dir: /config/producer
+    node-manager-http-listen-addr: ":13008"
+    node-manager-nodeos-api-addr: ":8888"
