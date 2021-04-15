@@ -41,12 +41,14 @@ var stopCmd = &cobra.Command{
 		bkd := domain.NewBackend(viper.GetString("BackendConfigDir"), e.EOS)
 		destroy, _ := cmd.Flags().GetBool("destroy")
 		if destroy {
+			fmt.Println("Destroying backend services...")
 			err := bkd.Destroy()
 			if err != nil {
 				return err
 			}
 			fmt.Println("Backend services destroyed.")
 		} else {
+			fmt.Println("Stopping backend services...")
 			err := bkd.Stop()
 			if err != nil {
 				return err

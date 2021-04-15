@@ -42,13 +42,14 @@ var startCmd = &cobra.Command{
 
 		restart, _ := cmd.Flags().GetBool("restart")
 		if restart {
+			fmt.Println("Destroying backend services...")
 			err := bkd.Destroy()
 			if err != nil {
 				return err
 			}
 			fmt.Println("Backend services have been destroyed. Restarting...")
 		}
-
+		fmt.Println("Starting backend services...")
 		err := bkd.Start()
 		if err != nil {
 			return err

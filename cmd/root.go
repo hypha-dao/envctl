@@ -139,7 +139,7 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(replacer)
 	recurseViperCommands(RootCmd, nil)
 
-	fmt.Println("\nAll viper settings: ", viper.AllSettings())
+	// fmt.Println("\nAll viper settings: ", viper.AllSettings())
 	e := e.E()
 	if e == nil {
 		zap.S().Fatal("unable to configure environment - E() is nil")
