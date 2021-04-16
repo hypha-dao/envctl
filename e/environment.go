@@ -66,8 +66,6 @@ func E() *Environment {
 		keyBag.ImportPrivateKey(context.Background(), eostest.DefaultKey())
 		Env.A.SetSigner(keyBag)
 		EOS = service.NewEOS(Env.A)
-
-		zlog.Debug("Configured Environment object with sync.Once.Do")
 	}
 	once.Do(onceBody)
 	return Env
@@ -91,7 +89,7 @@ func DefaultProgressBar(counter int, prefix string) *progressbar.ProgressBar {
 
 func Pause(seconds time.Duration, headline, prefix string) {
 	if headline != "" {
-		fmt.Println(headline)
+		zlog.Info(headline)
 	}
 
 	bar := progressbar.NewOptions(100,
@@ -113,13 +111,11 @@ func Pause(seconds time.Duration, headline, prefix string) {
 		bar.Add(1)
 		time.Sleep(chunk)
 	}
-	fmt.Println()
-	fmt.Println()
 }
 
 func DefaultPause(headline string) {
 	if headline != "" {
-		fmt.Println(headline)
+		zlog.Info(headline)
 	}
 
 	bar := progressbar.NewOptions(100,
@@ -141,8 +137,6 @@ func DefaultPause(headline string) {
 		bar.Add(1)
 		time.Sleep(chunk)
 	}
-	fmt.Println()
-	fmt.Println()
 }
 
 func ExecWithRetry(ctx context.Context, api *eos.API, actions []*eos.Action) (string, error) {

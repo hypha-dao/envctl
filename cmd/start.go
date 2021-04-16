@@ -24,8 +24,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/hypha-dao/envctl/domain"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
@@ -46,19 +44,19 @@ var startCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			fmt.Println("Backend services have been destroyed. Restarting...")
+			zlog.Info("Backend services have been destroyed. Restarting...")
 		}
 
 		err := bkd.Start()
 		if err != nil {
 			return err
 		}
-		fmt.Println("Backend services started. Initializing...")
+		zlog.Info("Backend services started. Initializing...")
 		err = bkd.Init(viper.GetStringMap("init-settings"))
 		if err != nil {
 			return err
 		}
-		fmt.Println("Deployed contracts and created accounts.")
+		zlog.Info("Deployed contracts and created accounts.")
 		return nil
 	},
 }

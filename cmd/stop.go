@@ -24,8 +24,6 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/hypha-dao/envctl/domain"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
@@ -45,13 +43,13 @@ var stopCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			fmt.Println("Backend services destroyed.")
+			zlog.Info("Backend services destroyed.")
 		} else {
 			err := bkd.Stop()
 			if err != nil {
 				return err
 			}
-			fmt.Println("Backend services stopped.")
+			zlog.Info("Backend services stopped.")
 		}
 
 		return nil

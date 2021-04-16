@@ -7,10 +7,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dfuse-io/logging"
 	"github.com/eoscanada/eos-go"
 	"github.com/eoscanada/eos-go/ecc"
 	"github.com/hypha-dao/envctl/contract"
 	"github.com/hypha-dao/envctl/service"
+	"go.uber.org/zap"
 )
 
 type Backend struct {
@@ -26,6 +28,12 @@ func NewBackend(configDir string, eos *service.EOS) *Backend {
 		EOS:           eos,
 		TokenContract: contract.NewTokenContract(eos),
 	}
+}
+
+var zlog *zap.Logger
+
+func init() {
+	logging.Register("github.com/hypha-dao/envctl/domain", &zlog)
 }
 
 func (m *Backend) Start() error {
@@ -79,7 +87,6 @@ func (m *Backend) deployContracts(deploy map[string]interface{}, publicKey *ecc.
 		if err != nil {
 			return err
 		}
-		fmt.Println("Deployed contract: ", account)
 
 		if supplyI, ok := contract["supply"]; ok {
 			supply := supplyI.(string)
@@ -104,7 +111,7 @@ func (m *Backend) createAccounts(accounts []string, publicKey *ecc.PublicKey) er
 		if err != nil {
 			return err
 		}
-		fmt.Println("Created account: ", account)
+		zlog.Info("Created account", zap.String("account-name", account))
 	}
 	return nil
 }
@@ -199,7 +206,7 @@ func (m *Backend) dockerCmd(args ...string) error {
 	cmd.Dir = m.ConfigDir
 	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("Error running docker-compose command with args: %v, error: %v", args, err)
+		return fmt.Errorf("error running docker-compose command with args: %v, error: %v", args, err)
 	}
 	return nil
 }

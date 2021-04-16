@@ -18,7 +18,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/hex"
-	"fmt"
 	"os"
 	"strings"
 
@@ -75,23 +74,21 @@ func init() {
 }
 
 func networkWarning() {
-	colorRed := "\033[31m"
-	colorReset := "\033[0m"
 	info, err := e.E().A.GetInfo(context.Background())
 	if err != nil {
-		zlog.Fatal(string(colorRed) + "ERROR: Unable to get " + e.E().AppName + " Blockchain Node info. Please check the EosioEndpoint configuration.")
+		zlog.Fatal("Unable to get " + e.E().AppName + " Blockchain Node info. Please check the EosioEndpoint configuration.")
 	}
 
 	if hex.EncodeToString(info.ChainID) == mainnetChainId {
-		fmt.Println(string(colorRed) + "\nERROR: Endpoint is connected to the Telos mainnet - cannot run envctl there. Please change your EOSIO endpoint configuration.")
-		fmt.Println(string(colorReset))
-		os.Exit(1)
+		zlog.Fatal("Endpoint is connected to the Telos mainnet - cannot run envctl there. Please change your EosioEndpoint configuration.")
 	} else if hex.EncodeToString(info.ChainID) == testnetChainId {
-		zlog.Info("\nNETWORK: Connecting to the Test Network")
+		zlog.Info("Connected to the Telos test network")
 	}
 }
 
 func initConfig() {
+
+	SetupLogger()
 
 	viper.SetDefault("Contract", "dao.hypha")
 	viper.SetDefault("DAO", "dao.hypha")
@@ -138,7 +135,8 @@ func initConfig() {
 	viper.SetEnvKeyReplacer(replacer)
 	recurseViperCommands(RootCmd, nil)
 
-	fmt.Println("\nAll viper settings: ", viper.AllSettings())
+	zlog.Debug("settings", zap.Reflect("settings", viper.AllSettings()))
+
 	e := e.E()
 	if e == nil {
 		zlog.Fatal("unable to configure environment - E() is nil")
