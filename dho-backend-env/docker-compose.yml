@@ -14,7 +14,7 @@ services:
       - 8888:8888
       - 8889:8889
   zero:
-    image: dgraph/dgraph:latest
+    image: dgraph/dgraph:v20.11.3
     volumes:
       - dgraph-data:/dgraph
     ports:
@@ -23,7 +23,7 @@ services:
     restart: on-failure
     command: dgraph zero --my=zero:${DGRAPH_ZERO_INTERNAL_PORT} -o ${DGRAPH_PORT_OFFSET}
   alpha:
-    image: dgraph/dgraph:latest
+    image: dgraph/dgraph:v20.11.3
     volumes:
       - dgraph-data:/dgraph
     ports:
@@ -33,7 +33,7 @@ services:
     restart: on-failure
     command: dgraph alpha --whitelist 172.17.0.0:172.90.0.0,192.168.0.0:192.169.0.0 --my=alpha:${DGRAPH_ALPHA_INTERNAL_PORT} --lru_mb=2048 --zero=zero:${DGRAPH_ZERO_INTERNAL_PORT} -o ${DGRAPH_PORT_OFFSET}
   ratel:
-    image: dgraph/dgraph:latest
+    image: dgraph/dgraph:v20.11.3
     ports:
       - ${DGRAPH_RATEL_HTTP_PORT}:8000
     command: dgraph-ratel
