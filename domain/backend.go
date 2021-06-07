@@ -200,10 +200,10 @@ func (m *Backend) dockerCmd(args ...string) error {
 	stderr := &strings.Builder{}
 	cmd.Stderr = stderr
 	err := cmd.Run()
+	fmt.Println("Docker output: ", stderr.String())
 	if err != nil {
 		return fmt.Errorf("error running docker-compose command with args: %v, error: %v", args, err)
 	}
-	fmt.Println(stderr.String())
 	return nil
 }
 
