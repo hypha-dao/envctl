@@ -195,6 +195,7 @@ func (m *Backend) createHVoiceToken(contract, issuer string,
 // }
 
 func (m *Backend) dockerCmd(args ...string) error {
+	fmt.Println("Backend config dir: ", m.ConfigDir)
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Dir = m.ConfigDir
 	stdout := &strings.Builder{}
