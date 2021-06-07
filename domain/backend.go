@@ -197,10 +197,13 @@ func (m *Backend) createHVoiceToken(contract, issuer string,
 func (m *Backend) dockerCmd(args ...string) error {
 	cmd := exec.Command("docker-compose", args...)
 	cmd.Dir = m.ConfigDir
+	stdout := &strings.Builder{}
 	stderr := &strings.Builder{}
+	cmd.Stdout = stdout
 	cmd.Stderr = stderr
 	err := cmd.Run()
-	fmt.Println("Docker output: ", stderr.String())
+	fmt.Println("Docker output: ", stdout.String())
+	fmt.Println("Docker error output: ", stderr.String())
 	if err != nil {
 		return fmt.Errorf("error running docker-compose command with args: %v, error: %v", args, err)
 	}
