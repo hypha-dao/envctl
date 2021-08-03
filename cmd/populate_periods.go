@@ -36,6 +36,7 @@ import (
 	"github.com/hypha-dao/envctl/pretend"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"go.uber.org/zap"
 )
 
 // populatePeriodsCmd populates the environment with the known Pretend environment
@@ -74,7 +75,7 @@ var populatePeriodsCmd = &cobra.Command{
 			period = *period.Next
 		}
 
-		fmt.Println("Adding "+strconv.Itoa(viper.GetInt("PeriodCount"))+" periods with duration 		: ", pretend.PayPeriodDuration())
+		zlog.Info("Adding periods", zap.Int("pay-period-count", viper.GetInt("PeriodCount")), zap.Duration("pay-period-duration", pretend.PayPeriodDuration()))
 		_, err = addPeriods(e.E().X, e.E().A, e.E().Contract, period, viper.GetInt("PeriodCount"), pretend.PayPeriodDuration())
 		if err != nil {
 			return fmt.Errorf("cannot add periods: %v ", err)
@@ -97,7 +98,7 @@ func addPeriods(ctx context.Context, api *eos.API, daoContract eos.AccountName,
 
 	periods := make([]models.Period, numPeriods)
 
-	fmt.Println("\nAdding periods: " + strconv.Itoa(len(periods)))
+	zlog.Info("\nAdding periods: " + strconv.Itoa(len(periods)))
 	bar := e.DefaultProgressBar(len(periods), "")
 
 	for i := 0; i < numPeriods; i++ {

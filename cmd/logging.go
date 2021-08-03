@@ -18,17 +18,18 @@ import (
 	"os"
 	"strings"
 
-	zapbox "github.com/hypha-dao/envctl/zap-box"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
+	// zapbox "github.com/dfuse-io/dlauncher/zap-box"
 	"github.com/dfuse-io/logging"
+	zapbox "github.com/hypha-dao/envctl/zap-box"
 )
 
 var zlog *zap.Logger
 
 func init() {
-	logging.Register("main", &zlog)
+	logging.Register("github.com/hypha-dao/envctl/cmd", &zlog)
 }
 
 func SetupLogger() {

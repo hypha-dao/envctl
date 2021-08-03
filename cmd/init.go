@@ -45,14 +45,14 @@ var initCmd = &cobra.Command{
 	Long:  "initialize a new nodeos instance for population",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		fmt.Println("init command assumes local instance for now...")
+		zlog.Info("init command assumes local instance for now...")
 
 		restartCmd, err := eostest.RestartNodeos(true)
 		if err != nil {
 			return fmt.Errorf("unable to restart nodeos: %v", err)
 		}
 
-		fmt.Println("(Re)started nodeos with PID: " + strconv.Itoa(restartCmd.Process.Pid))
+		zlog.Info("(Re)started node", zap.String("nodeos-pid", strconv.Itoa(restartCmd.Process.Pid)))
 
 		var daoHome = viper.GetString("DAOHome")
 		var daoPrefix = daoHome + "/build/dao/dao."
@@ -66,43 +66,48 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("DAO"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.DAO)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.DAO)))
 
 		e.Env.HusdToken, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("HusdToken"), eostest.DefaultKey())
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("HusdToken"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.HusdToken)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.HusdToken)))
 
 		e.Env.HyphaToken, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("HyphaToken"), eostest.DefaultKey())
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("HyphaToken"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.HyphaToken)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.HyphaToken)))
 
 		e.Env.HvoiceToken, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("HvoiceToken"), eostest.DefaultKey())
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("HvoiceToken"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.HvoiceToken)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.HvoiceToken)))
 
 		e.Env.Bank, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("Bank"), eostest.DefaultKey())
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("Bank"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.Bank)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.Bank)))
 
 		e.Env.Events, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("Events"), eostest.DefaultKey())
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("Events"), err)
 		}
-		fmt.Println("Created account		: ", e.Env.Events)
+		zlog.Info("Created account", zap.String("account-name", string(e.Env.Events)))
 
 		// e.Env.TelosDecide, err = eostest.CreateAccountFromString(e.Env.X, e.Env.A, viper.GetString("TelosDecide"), eostest.DefaultKey())
 		// if err != nil {
 		// 	return fmt.Errorf("unable to create account from string: %v %v", viper.GetString("TelosDecide"), err)
 		// }
-		// fmt.Println("Created account		: ", e.Env.TelosDecide)
+		// zlog.Info("Created account		: ", e.Env.TelosDecide)
+
+		bankPublicKey, err := toPublic(eostest.DefaultKey())
+		if err != nil {
+			return fmt.Errorf("unable to derive public key: %v %v", eostest.DefaultKey(), err)
+		}
 
 		bankPermissionActions := []*eos.Action{system.NewUpdateAuth(e.Env.Bank,
 			"active",
@@ -110,7 +115,7 @@ var initCmd = &cobra.Command{
 			eos.Authority{
 				Threshold: 1,
 				Keys: []eos.KeyWeight{{
-					PublicKey: toPublic(eostest.DefaultKey()),
+					PublicKey: bankPublicKey,
 					Weight:    1,
 				}},
 				Accounts: []eos.PermissionLevelWeight{
@@ -135,51 +140,51 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("unable to update bank account permissions: %v %v", viper.GetString("Bank"), err)
 		}
-		fmt.Println("Created accounts and updated permissions 	; 	TrxID				: ", trxId)
+		zlog.Info("Updated permissions", zap.String("account-name", string(e.Env.Bank)), zap.String("trx-id", trxId))
 
 		trxId, err = eostest.SetContract(e.Env.X, e.Env.A, e.Env.DAO, daoPrefix+"wasm", daoPrefix+"abi")
 		if err != nil {
 			return fmt.Errorf("unable to set contract on DAO: %v %v", e.Env.DAO, err)
 		}
-		fmt.Println("Deployed DAO contract to 					: ", e.Env.DAO, "		;  TrxID: ", trxId)
+		zlog.Info("Deployed contract", zap.String("account-name", string(e.Env.DAO)), zap.String("trx-id", trxId), zap.String("wasm", daoPrefix+"wasm"), zap.String("abi", daoPrefix+"abi"))
 
 		trxId, err = eostest.SetContract(e.Env.X, e.Env.A, e.Env.Bank, treasuryPrefix+"wasm", treasuryPrefix+"abi")
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", e.Env.Bank, err)
 		}
-		fmt.Println("Deployed Treasury contract to 			: ", e.Env.Bank, "		;  TrxID: ", trxId)
+		zlog.Info("Deployed contract", zap.String("account-name", string(e.Env.Bank)), zap.String("trx-id", trxId), zap.String("wasm", treasuryPrefix+"wasm"), zap.String("abi", treasuryPrefix+"abi"))
 
 		trxId, err = eostest.SetContract(e.Env.X, e.Env.A, e.Env.HvoiceToken, voicePrefix+"wasm", voicePrefix+"abi")
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", e.Env.HvoiceToken, err)
 		}
-		fmt.Println("Deployed Voice contract to 				: ", e.Env.HvoiceToken, "	;  TrxID: ", trxId)
+		zlog.Info("Deployed contract", zap.String("account-name", string(e.Env.HvoiceToken)), zap.String("trx-id", trxId), zap.String("wasm", voicePrefix+"wasm"), zap.String("abi", voicePrefix+"abi"))
 
 		// trxId, err = eostest.SetContract(e.Env.X, e.Env.A, e.Env.TelosDecide, decidePrefix+"wasm", decidePrefix+"abi")
 		// if err != nil {
 		// 	return fmt.Errorf("unable to create account from string: %v %v", e.Env.TelosDecide, err)
 		// }
-		// fmt.Println("Deployed Telos Decide contract to 				: ", e.Env.TelosDecide, "	;  TrxID: ", trxId)
+		// zlog.Info("Deployed Telos Decide contract to 				: ", e.Env.TelosDecide, "	;  TrxID: ", trxId)
 
 		trxId, err = eostest.SetContract(e.Env.X, e.Env.A, e.Env.Events, monitorPrefix+"wasm", monitorPrefix+"abi")
 		if err != nil {
 			return fmt.Errorf("unable to create account from string: %v %v", e.Env.Events, err)
 		}
-		fmt.Println("Deployed Event Monitor contract to 				: ", e.Env.Events, "	;  TrxID: ", trxId)
+		zlog.Info("Deployed contract", zap.String("account-name", string(e.Env.Events)), zap.String("trx-id", trxId), zap.String("wasm", monitorPrefix+"wasm"), zap.String("abi", monitorPrefix+"abi"))
 
 		husdMaxSupply, _ := eos.NewAssetFromString("1000000000.00 HUSD")
 		trxId, err = deployAndCreateToken(e.Env.X, e.Env.A, artifactsHome, e.Env.HusdToken, e.Env.Bank, husdMaxSupply)
 		if err != nil {
 			return fmt.Errorf("unable to deploy and create HUSD token: %v", err)
 		}
-		fmt.Println("Deployed and created token				: ", e.Env.HusdToken, "	;  TrxID: ", trxId)
+		zlog.Info("Created Token", zap.String("supply", husdMaxSupply.String()), zap.String("trx-id", trxId), zap.String("issuer", string(e.Env.Bank)), zap.String("token-contract", string(e.Env.HusdToken)))
 
 		hyphaMaxSupply, _ := eos.NewAssetFromString("1000000000.00 HYPHA")
 		trxId, err = deployAndCreateToken(e.Env.X, e.Env.A, artifactsHome, e.Env.HyphaToken, e.Env.DAO, hyphaMaxSupply)
 		if err != nil {
 			return fmt.Errorf("unable to deploy and create HYPHA token: %v", err)
 		}
-		fmt.Println("Deployed and created token				: ", e.Env.HyphaToken, "	;  TrxID: ", trxId)
+		zlog.Info("Created Token", zap.String("supply", hyphaMaxSupply.String()), zap.String("trx-id", trxId), zap.String("issuer", string(e.Env.DAO)), zap.String("token-contract", string(e.Env.HyphaToken)))
 
 		// Hvoice doesn't have any limit (max supply should be -1)
 		hvoiceMaxSupply, _ := eos.NewAssetFromString("-1.00 HVOICE")
@@ -187,7 +192,7 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			return fmt.Errorf("unable to deploy and create HVOICE token: %v", err)
 		}
-		fmt.Println("Created token				: ", e.Env.HvoiceToken, "	;  TrxID: ", trxId)
+		zlog.Info("Created Token", zap.String("supply", hvoiceMaxSupply.String()), zap.String("trx-id", trxId), zap.String("issuer", string(e.Env.DAO)), zap.String("token-contract", string(e.Env.HvoiceToken)))
 
 		index := 1
 		for index < 6 {
@@ -198,6 +203,7 @@ var initCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("unable to create account from string: %v %v", memberName, err)
 			}
+			zlog.Info("Created account", zap.String("account-name", memberName))
 
 			e.Env.Members = append(e.Env.Members, member)
 			index++
@@ -210,7 +216,7 @@ var initCmd = &cobra.Command{
 
 		e.Env.Members = append(e.Env.Members, johnnyhypha)
 
-		fmt.Println("initialized nodeos")
+		zlog.Debug("Nodeos initialization complete")
 		return nil
 	},
 }
@@ -249,11 +255,14 @@ type tokenCreate struct {
 func deployAndCreateToken(ctx context.Context, api *eos.API, tokenHome string,
 	contract, issuer eos.AccountName, maxSupply eos.Asset) (string, error) {
 
-	trxId, err := eostest.SetContract(ctx, api, contract, tokenHome+"/token/token.wasm", tokenHome+"/token/token.abi")
+	tokenWasm := tokenHome + "/token/token.wasm"
+	tokenAbi := tokenHome + "/token/token.abi"
+
+	trxId, err := eostest.SetContract(ctx, api, contract, tokenWasm, tokenAbi)
 	if err != nil {
 		return "", fmt.Errorf("cannot set contract from: %v %v", tokenHome, err)
 	}
-	fmt.Println("Set token contract to account 				: ", contract, "	;  TrxID: ", trxId)
+	zlog.Info("Deployed contract", zap.String("account-name", string(e.Env.Events)), zap.String("trx-id", trxId), zap.String("wasm", tokenWasm), zap.String("abi", tokenAbi))
 
 	actions := []*eos.Action{{
 		Account: contract,
@@ -270,14 +279,14 @@ func deployAndCreateToken(ctx context.Context, api *eos.API, tokenHome string,
 	return e.ExecWithRetry(ctx, api, actions)
 }
 
-func toPublic(privateKey string) ecc.PublicKey {
+func toPublic(privateKey string) (ecc.PublicKey, error) {
 
 	key, err := ecc.NewPrivateKey(privateKey)
 	if err != nil {
-		zap.S().Fatalf("privateKey parameter is not a valid format: %s", err)
+		return ecc.PublicKey{}, fmt.Errorf("privateKey parameter is not a valid format: %s", err)
 	}
 
-	return key.PublicKey()
+	return key.PublicKey(), nil
 }
 
 func init() {
