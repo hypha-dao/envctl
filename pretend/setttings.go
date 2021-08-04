@@ -61,6 +61,12 @@ const rawSettings = `[
 		  "trailservice"
 		]
 	  },{
+		"label": "hvoice_token_contract",
+		"value": [
+		  "name",
+		  "voice.hypha"
+		]
+	  },{
 		"label": "treasury_contract",
 		"value": [
 		  "name",

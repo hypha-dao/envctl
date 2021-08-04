@@ -27,27 +27,6 @@ import (
 
 //lint:file-ignore U1000 Ignore all unused code for now, much of it copied from elsewhere
 
-func Exec(ctx context.Context, api *eos.API, actions []*eos.Action) (string, error) {
-	txOpts := &eos.TxOptions{}
-	if err := txOpts.FillFromChain(ctx, api); err != nil {
-		return string(""), fmt.Errorf("error filling tx opts: %s", err)
-	}
-
-	tx := eos.NewTransaction(actions, txOpts)
-
-	_, packedTx, err := api.SignTransaction(ctx, tx, txOpts.ChainID, eos.CompressionNone)
-	if err != nil {
-		return string(""), fmt.Errorf("error signing transaction: %s", err)
-	}
-
-	response, err := api.PushTransaction(ctx, packedTx)
-	if err != nil {
-		return string(""), fmt.Errorf("error pushing transaction: %s", err)
-	}
-	trxID := hex.EncodeToString(response.Processed.ID)
-	return trxID, nil
-}
-
 func mustGetWallet() *eosvault.Vault {
 	vault, err := setupWallet()
 	errorCheck("wallet setup", err)
