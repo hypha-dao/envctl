@@ -24,6 +24,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/hypha-dao/envctl/domain"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
