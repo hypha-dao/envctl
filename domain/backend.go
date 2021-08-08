@@ -11,18 +11,19 @@ import (
 	"github.com/dfuse-io/logging"
 	"github.com/eoscanada/eos-go"
 	"github.com/eoscanada/eos-go/ecc"
-	"github.com/hypha-dao/envctl/contract"
 	"github.com/hypha-dao/envctl/service"
+	"github.com/sebastianmontero/eos-go-toolbox/contract"
+	etbservice "github.com/sebastianmontero/eos-go-toolbox/service"
 	"go.uber.org/zap"
 )
 
 type Backend struct {
 	ConfigDir     string
-	EOS           *service.EOS
+	EOS           *etbservice.EOS
 	TokenContract *contract.TokenContract
 }
 
-func NewBackend(configDir string, eos *service.EOS) *Backend {
+func NewBackend(configDir string, eos *etbservice.EOS) *Backend {
 
 	return &Backend{
 		ConfigDir:     configDir,

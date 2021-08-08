@@ -144,8 +144,9 @@ github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70 h1:CuJS05R9jmNlUK
 github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70/go.mod h1:EoK/8RFbMEteaCaz89uessDTnCWjbbcr+DXcBh4el5o=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-sip13 v0.0.0-20181026042036-e10d5fee7954/go.mod h1:vAd38F8PWV+bWy6jNmig1y/TA+kYO4g3RSRF0IAv0no=
-github.com/digital-scarcity/eos-go-test v0.0.0-20210402180605-db8bc7b54896 h1:EmoaawlkcDwIw4Q6AZYgOKKnzy06LydUnH/BjFJO3A8=
 github.com/digital-scarcity/eos-go-test v0.0.0-20210402180605-db8bc7b54896/go.mod h1:QzVz4NhzRTE1KTsbqCrZa/HtNkVm2AYsO/8dfIMzR5c=
+github.com/digital-scarcity/eos-go-test v0.0.0-20210421164317-b5d51aa34fbb h1:HtB9ewgBLy1N1pBrtH7vpsPiu5AjGK/WUuywu5PRIiE=
+github.com/digital-scarcity/eos-go-test v0.0.0-20210421164317-b5d51aa34fbb/go.mod h1:oLjNGc97WVqo8eAt2pTDEAw/7VDz7iwAsOrqSPOwqVA=
 github.com/docker/docker v1.4.2-0.20180625184442-8e610b2b55bf/go.mod h1:eEKB0N0r5NX/I1kEveEz05bcu8tLC/8azJZsviup8Sk=
 github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
@@ -510,6 +511,8 @@ github.com/schollz/progressbar/v3 v3.7.4/go.mod h1:1H8m5kMPW6q5fyjpDqtBHW1JT22mu
 github.com/schollz/progressbar/v3 v3.7.6 h1:akAvVpTy2IAcePWYndctoBaY9bLE3z4LE1Hn91BJ9g4=
 github.com/schollz/progressbar/v3 v3.7.6/go.mod h1:Y9mmL2knZj3LUaBDyBEzFdPrymIr08hnlFMZmfxwbx4=
 github.com/sean-/seed v0.0.0-20170313163322-e2103e2c3529/go.mod h1:DxrIzT+xaE7yg65j358z/aeFdxmN0P9QXhEzd20vsDc=
+github.com/sebastianmontero/eos-go-toolbox v0.0.0-20210713215758-03e6dac09932 h1:XlVz2y4nIaQGB1nbvjyW0exyeq5EZsfvLwAtViK+nMg=
+github.com/sebastianmontero/eos-go-toolbox v0.0.0-20210713215758-03e6dac09932/go.mod h1:KV26OVZaECVwnqhCZ0Bf9iJVqJkznD5bjt+5SQxu6Mg=
 github.com/sergi/go-diff v1.1.0 h1:we8PVUC3FE2uYfodKH/nBHMSetSfHDR6scGdBi+erh0=
 github.com/sergi/go-diff v1.1.0/go.mod h1:STckp+ISIX8hZLjrqAeVduY0gWCT9IjLuqbuNXdaHfM=
 github.com/shirou/gopsutil v3.21.7+incompatible h1:g/wcPHcuCQvHSePVofjQljd2vX4ty0+J6VoMB+NPcdk=

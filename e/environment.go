@@ -10,9 +10,9 @@ import (
 
 	"github.com/dfuse-io/logging"
 	eostest "github.com/digital-scarcity/eos-go-test"
-	"github.com/hypha-dao/envctl/service"
 	"github.com/k0kubun/go-ansi"
 	"github.com/schollz/progressbar/v3"
+	"github.com/sebastianmontero/eos-go-toolbox/service"
 	"go.uber.org/zap"
 
 	"github.com/eoscanada/eos-go"

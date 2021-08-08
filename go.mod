@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.60.0 // indirect
 	github.com/bronze1man/go-yaml2json v0.0.0-20150129175009-f6f64b738964
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
-	github.com/digital-scarcity/eos-go-test v0.0.0-20210402180605-db8bc7b54896
+	github.com/digital-scarcity/eos-go-test v0.0.0-20210421164317-b5d51aa34fbb
 	github.com/eoscanada/eos-go v0.9.1-0.20200805141443-a9d5402a7bc5
 	github.com/eoscanada/eosc v1.4.0
 	github.com/go-git/go-git/v5 v5.4.2
@@ -18,6 +18,7 @@ require (
 	github.com/logrusorgru/aurora v2.0.3+incompatible
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/schollz/progressbar/v3 v3.7.6
+	github.com/sebastianmontero/eos-go-toolbox v0.0.0-20210713215758-03e6dac09932
 	github.com/shirou/gopsutil v3.21.7+incompatible
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/pflag v1.0.5
