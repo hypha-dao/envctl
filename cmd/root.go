@@ -142,7 +142,7 @@ func initConfig() {
 		zlog.Fatal("unable to configure environment - E() is nil")
 	}
 
-	networkWarning()
+	// networkWarning()
 }
 
 func recurseViperCommands(root *cobra.Command, segments []string) {

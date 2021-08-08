@@ -12,77 +12,53 @@ import (
 )
 
 func CheckoutRepo(dir, repoURL, branch string) error {
-	repoName, err := GetRepoName(repoURL)
+	repoName, err := getRepoName(repoURL)
 	if err != nil {
 		return err
 	}
 	fullDir := path.Join(dir, repoName)
-	// if fullDir == "" {
-	// 	return fmt.Errorf("final dir is empty")
-	// }
-	// if force {
-	// 	err := os.RemoveAll(fullDir)
-	// 	if err != nil {
-	// 		return fmt.Errorf("failed to delete existing repo directory: %v, error: %v", fullDir, err)
-	// 	}
-	// }
-	repo, err := OpenRepo(fullDir)
+	repo, err := openRepo(fullDir)
 	if err != nil {
 		return err
 	}
 
 	if repo == nil {
-		_, err = CloneRepo(fullDir, repoURL, branch)
+		_, err = cloneRepo(fullDir, repoURL, branch)
 		return err
 	}
-
-	// err = repo.Fetch(&git.FetchOptions{
-	// 	RefSpecs: []config.RefSpec{
-	// 		"refs/heads/master:refs/remotes/origin/master",
-	// 	},
-	// 	Progress: os.Stdout,
-	// })
-	// if err != nil {
-	// 	if !strings.Contains(err.Error(), git.NoErrAlreadyUpToDate.Error()) {
-	// 		return fmt.Errorf("failed fetching for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
-	// 	}
-	// }
 
 	worktree, err := repo.Worktree()
 	if err != nil {
 		return fmt.Errorf("failed getting worktree for repo: %v, from path: %v, error: %v", repoURL, fullDir, err)
 	}
 
-	branchReference, err := GetBranchRef(repo, "master")
-	if err != nil {
-		return fmt.Errorf("failed getting reference for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
-	}
-	fmt.Println("Ref Name: ", branchReference.Name().Short(), plumbing.NewBranchReferenceName("master").String())
-
-	// err = repo.CreateBranch(&config.Branch{
-	// 	Name:   "master",
-	// 	Remote: "origin/master",
-	// 	Merge:  plumbing.NewBranchReferenceName("master"),
-	// })
-	// if err != nil {
-	// 	return fmt.Errorf("failed creating branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
-	// }
-	localRef := plumbing.NewBranchReferenceName("master")
-	remoteRef := plumbing.NewRemoteReferenceName("origin", "master")
+	localRef := plumbing.NewBranchReferenceName(branch)
+	remoteRef := plumbing.NewRemoteReferenceName("origin", branch)
 	err = repo.Storer.SetReference(plumbing.NewSymbolicReference(localRef, remoteRef))
 	if err != nil {
-		return fmt.Errorf("failed setting reference branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+		return fmt.Errorf("failed setting reference for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
 	}
 	err = worktree.Checkout(&git.CheckoutOptions{
-		// Hash:   branchReference.Hash(),
 		Branch: localRef,
-		// Create: true,
 	})
 	if err != nil {
 		return fmt.Errorf("failed checking out branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
 	}
 
-	err = worktree.Pull(&git.PullOptions{
+	err = pullBranch(localRef, worktree)
+	if err != nil {
+		return fmt.Errorf("failed getting submodules for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+	}
+
+	err = updateSubmodules(worktree)
+	if err != nil {
+		return fmt.Errorf("failed updating submodules for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+	}
+	return nil
+}
+
+func pullBranch(localRef plumbing.ReferenceName, worktree *git.Worktree) error {
+	err := worktree.Pull(&git.PullOptions{
 		ReferenceName:     localRef,
 		RemoteName:        "origin",
 		Progress:          os.Stdout,
@@ -91,24 +67,27 @@ func CheckoutRepo(dir, repoURL, branch string) error {
 	})
 	if err != nil {
 		if !strings.Contains(err.Error(), git.NoErrAlreadyUpToDate.Error()) {
-			return fmt.Errorf("failed pulling changes for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+			return fmt.Errorf("failed pulling changes for local ref: %v, error: %v", localRef, err)
 		}
 	}
+	return nil
+}
 
+func updateSubmodules(worktree *git.Worktree) error {
 	submodules, err := worktree.Submodules()
 	if err != nil {
-		return fmt.Errorf("failed getting submodules for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+		return fmt.Errorf("failed getting submodules, error: %v", err)
 	}
 	err = submodules.Update(&git.SubmoduleUpdateOptions{
 		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
 	})
 	if err != nil {
-		return fmt.Errorf("failed updating submodules for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+		return fmt.Errorf("failed updating submodules , error: %v", err)
 	}
 	return nil
 }
 
-func GetBranchRef(repo *git.Repository, branch string) (*plumbing.Reference, error) {
+func getBranchRef(repo *git.Repository, branch string) (*plumbing.Reference, error) {
 	refs, err := repo.References()
 	if err != nil {
 		return nil, fmt.Errorf("failed getting references, err: %v", err)
@@ -128,7 +107,7 @@ func GetBranchRef(repo *git.Repository, branch string) (*plumbing.Reference, err
 	}
 }
 
-func OpenRepo(path string) (*git.Repository, error) {
+func openRepo(path string) (*git.Repository, error) {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
 		if strings.Contains(err.Error(), git.ErrRepositoryNotExists.Error()) {
@@ -140,7 +119,7 @@ func OpenRepo(path string) (*git.Repository, error) {
 	return repo, nil
 }
 
-func CloneRepo(dir, repoURL, branch string) (*git.Repository, error) {
+func cloneRepo(dir, repoURL, branch string) (*git.Repository, error) {
 	repo, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:               repoURL,
 		Progress:          os.Stdout,
@@ -155,7 +134,7 @@ func CloneRepo(dir, repoURL, branch string) (*git.Repository, error) {
 	return repo, nil
 }
 
-func GetRepoName(repoURL string) (string, error) {
+func getRepoName(repoURL string) (string, error) {
 	u, err := url.Parse(repoURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse repo url: %v, error: %v", repoURL, err)

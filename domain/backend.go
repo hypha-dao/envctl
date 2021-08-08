@@ -2,7 +2,8 @@ package domain
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -48,8 +49,16 @@ func (m *Backend) Destroy() error {
 	return m.dockerCmd("down", "-v")
 }
 
-func (m *Backend) Init(initSettings map[string]interface{}) error {
+func (m *Backend) Init(initSettings map[string]interface{}, restart bool) error {
 	publicKey, err := m.EOS.AddEOSIOKey()
+	if err != nil {
+		return err
+	}
+	err = m.checkoutRepos(initSettings["checkout-repos"].(map[string]interface{}))
+	if err != nil {
+		return err
+	}
+	err = m.buildContracts(initSettings["build-contracts"].(map[string]interface{}), restart)
 	if err != nil {
 		return err
 	}
@@ -70,6 +79,61 @@ func (m *Backend) Init(initSettings map[string]interface{}) error {
 	return nil
 }
 
+func (m *Backend) checkoutRepos(checkout map[string]interface{}) error {
+	basePath := checkout["base-path"].(string)
+	repos := checkout["repos"].([]interface{})
+	for _, repoI := range repos {
+		repo := repoI.(map[interface{}]interface{})
+		url := repo["url"].(string)
+		branch := repo["branch"].(string)
+		fmt.Printf("Checking out repo: %v, branch: %v\n", url, branch)
+		err := service.CheckoutRepo(basePath, url, branch)
+		if err != nil {
+			return fmt.Errorf("failed to check out repo: %v, branch: %v, error %v", url, branch, err)
+		}
+	}
+	return nil
+}
+
+func (m *Backend) buildContracts(build map[string]interface{}, restart bool) error {
+	basePath := build["base-path"].(string)
+	repos := build["repos"].([]interface{})
+	for _, repoI := range repos {
+		repo := repoI.(map[interface{}]interface{})
+		name := repo["name"].(string)
+		repoPath := path.Join(basePath, name)
+		fmt.Printf("Building repo: %v\n", repoPath)
+		buildPath := path.Join(repoPath, "build")
+		err := os.Mkdir(buildPath, 0755)
+		if err != nil && !os.IsExist(err) {
+			return err
+		}
+		isDirEmpty, err := service.IsDirEmpty(buildPath)
+		if err != nil {
+			return fmt.Errorf("failed to check if build path: %v is empty, error: %v", buildPath, err)
+		}
+		if restart || isDirEmpty {
+			err = service.ExecCmd(&service.CmdArgs{
+				Name: "cmake",
+				Args: []string{".."},
+				Dir:  buildPath,
+			})
+			if err != nil {
+				return fmt.Errorf("failed running cmake for repo: %v, build path: %v, error %v", repoPath, buildPath, err)
+			}
+
+			err = service.ExecCmd(&service.CmdArgs{
+				Name: "make",
+				Dir:  buildPath,
+			})
+			if err != nil {
+				return fmt.Errorf("failed running make for repo: %v, build path: %v, error %v", repoPath, buildPath, err)
+			}
+		}
+	}
+	return nil
+}
+
 func (m *Backend) deployContracts(deploy map[string]interface{}, publicKey *ecc.PublicKey) error {
 	basePath := deploy["base-path"].(string)
 	contracts := deploy["contracts"].([]interface{})
@@ -79,6 +143,7 @@ func (m *Backend) deployContracts(deploy map[string]interface{}, publicKey *ecc.
 		fileName := contract["file-name"].(string)
 		account := contract["account"].(string)
 		fullPath := filepath.Join(basePath, path, fileName)
+		fmt.Printf("Deploying contract: %v, to account: %v\n", fullPath, account)
 		_, err := m.EOS.SetContract(account, fmt.Sprintf("%v.wasm", fullPath), fmt.Sprintf("%v.abi", fullPath), publicKey)
 		if err != nil {
 			return fmt.Errorf("failed to deploy contract %v, error %v", account, err)
@@ -203,15 +268,11 @@ func (m *Backend) createHVoiceToken(contract, issuer string,
 
 func (m *Backend) dockerCmd(args ...string) error {
 	fmt.Println("Backend config dir: ", m.ConfigDir)
-	cmd := exec.Command("docker-compose", args...)
-	cmd.Dir = m.ConfigDir
-	stdout := &strings.Builder{}
-	stderr := &strings.Builder{}
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	err := cmd.Run()
-	fmt.Println("Docker output: ", stdout.String())
-	fmt.Println("Docker error output: ", stderr.String())
+	err := service.ExecCmd(&service.CmdArgs{
+		Name: "docker-compose",
+		Args: args,
+		Dir:  m.ConfigDir,
+	})
 	if err != nil {
 		return fmt.Errorf("error running docker-compose command with args: %v, error: %v", args, err)
 	}

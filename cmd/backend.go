@@ -24,43 +24,16 @@
 package cmd
 
 import (
-	"fmt"
-
-	"github.com/hypha-dao/envctl/domain"
-	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// stopCmd represents the stop command
-var stopCmd = &cobra.Command{
-	Use:   "stop",
-	Short: "Stops backend environment",
-	Long:  "Stops backend environment",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		bkd := domain.NewBackend(viper.GetString("BackendConfigDir"), e.EOS)
-		destroy, _ := cmd.Flags().GetBool("destroy")
-		if destroy {
-			fmt.Println("Destroying backend services...")
-			err := bkd.Destroy()
-			if err != nil {
-				return err
-			}
-			zlog.Info("Backend services destroyed.")
-		} else {
-			fmt.Println("Stopping backend services...")
-			err := bkd.Stop()
-			if err != nil {
-				return err
-			}
-			zlog.Info("Backend services stopped.")
-		}
-
-		return nil
-	},
+// backendCmd represents the backend command
+var backendCmd = &cobra.Command{
+	Use:   "backend",
+	Short: "start, stops and inits the backend",
+	Long:  "start, stops and inits the backend",
 }
 
 func init() {
-	stopCmd.Flags().BoolP("destroy", "d", false, "Destroy backend and delete all data")
-	RootCmd.AddCommand(stopCmd)
+	RootCmd.AddCommand(backendCmd)
 }

@@ -8,6 +8,6 @@ import (
 )
 
 func TestCheckout(t *testing.T) {
-	err := service.CheckoutRepo("/home/sebastian/test-checkout", "https://github.com/hypha-dao/dao-contracts", "develop")
+	err := service.CheckoutRepo("/home/sebastian/test-checkout", "https://github.com/hypha-dao/dao-contracts", "master")
 	assert.NilError(t, err)
 }

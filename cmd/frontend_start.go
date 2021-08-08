@@ -27,44 +27,26 @@ import (
 	"fmt"
 
 	"github.com/hypha-dao/envctl/domain"
-	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// startCmd represents the start command
-var startCmd = &cobra.Command{
+// frontendStartCmd represents the frontendStart command
+var frontendStartCmd = &cobra.Command{
 	Use:   "start",
-	Short: "Starts backend environment",
-	Long:  "Starts backend environment, and deploys dhos contracts",
+	Short: "Starts frontend app",
+	Long:  "Starts frontend app",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		bkd := domain.NewBackend(viper.GetString("BackendConfigDir"), e.EOS)
-
-		restart, _ := cmd.Flags().GetBool("restart")
-		if restart {
-			fmt.Println("Destroying backend services...")
-			err := bkd.Destroy()
-			if err != nil {
-				return err
-			}
-			zlog.Info("Backend services have been destroyed. Restarting...")
-		}
-		fmt.Println("Starting backend services...")
-		err := bkd.Start()
+		frontend := domain.NewFrontend(viper.GetStringMap("frontend-init-settings"))
+		fmt.Println("Starting frontend app...")
+		err := frontend.Start()
 		if err != nil {
 			return err
 		}
-		zlog.Info("Backend services started. Initializing...")
-		err = bkd.Init(viper.GetStringMap("init-settings"))
-		if err != nil {
-			return err
-		}
-		zlog.Info("Deployed contracts and created accounts.")
 		return nil
 	},
 }
 
 func init() {
-	startCmd.Flags().BoolP("restart", "r", false, "Starts a clean environment")
-	RootCmd.AddCommand(startCmd)
+	frontendCmd.AddCommand(frontendStartCmd)
 }
