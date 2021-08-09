@@ -62,5 +62,5 @@ var backendStopCmd = &cobra.Command{
 
 func init() {
 	backendStopCmd.Flags().BoolP("destroy", "d", false, "Destroy backend and delete all data")
-	RootCmd.AddCommand(backendStopCmd)
+	backendCmd.AddCommand(backendStopCmd)
 }
