@@ -28,6 +28,8 @@ import (
 
 	"github.com/hypha-dao/envctl/domain"
 	"github.com/hypha-dao/envctl/e"
+	"github.com/hypha-dao/envctl/initialize"
+	"github.com/hypha-dao/envctl/initialize/handler"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -55,7 +57,11 @@ var backendStartCmd = &cobra.Command{
 			return err
 		}
 		zlog.Info("Backend services started. Initializing...")
-		err = bkd.Init(viper.GetStringMap("backend-init-settings"), restart)
+		initOp := handler.InitializeOp_Start
+		if restart {
+			initOp = handler.InitializeOp_Restart
+		}
+		err = initialize.Initialize(viper.Get("backend-init-settings").([]interface{}), e.EOS, initOp)
 		if err != nil {
 			return err
 		}

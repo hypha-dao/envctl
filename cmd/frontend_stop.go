@@ -26,7 +26,9 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/hypha-dao/envctl/domain"
+	"github.com/hypha-dao/envctl/e"
+	"github.com/hypha-dao/envctl/initialize"
+	"github.com/hypha-dao/envctl/initialize/handler"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -37,9 +39,8 @@ var frontendStopCmd = &cobra.Command{
 	Short: "Stops frontend app",
 	Long:  "Stops frontend app",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		frontend := domain.NewFrontend(viper.GetStringMap("frontend-init-settings"))
 		fmt.Println("Stopping frontend app...")
-		err := frontend.Stop()
+		err := initialize.Initialize(viper.Get("frontend-init-settings").([]interface{}), e.EOS, handler.InitializeOp_Stop)
 		if err != nil {
 			return err
 		}
