@@ -37,6 +37,7 @@ type Environment struct {
 	HusdToken     eos.AccountName
 	HyphaToken    eos.AccountName
 	HvoiceToken   eos.AccountName
+	Exchange      eos.AccountName
 	Bank          eos.AccountName
 	Events        eos.AccountName
 	Members       []eos.AccountName
@@ -57,6 +58,7 @@ func E() *Environment {
 			Contract:    eos.AN(viper.GetString("Contract")),
 			DAO:         eos.AN(viper.GetString("DAO")),
 			TelosDecide: eos.AN("trailservice"),
+			Exchange:    eos.AN(viper.GetString("Exchange")),
 			User:        eos.AN(viper.GetString("UserAccount")),
 			Pause:       viper.GetDuration("Pause"),
 		}

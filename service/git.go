@@ -26,6 +26,10 @@ func CheckoutRepo(dir, repoURL, branch string) error {
 		_, err = cloneRepo(fullDir, repoURL, branch)
 		return err
 	}
+	err = fetch(repo)
+	if err != nil {
+		return fmt.Errorf("failed running fetch on repo: %v, from path: %v, error: %v", repoURL, fullDir, err)
+	}
 
 	worktree, err := repo.Worktree()
 	if err != nil {
@@ -53,6 +57,19 @@ func CheckoutRepo(dir, repoURL, branch string) error {
 	err = updateSubmodules(worktree)
 	if err != nil {
 		return fmt.Errorf("failed updating submodules for branch: %v for repo: %v in path: %v, error: %v", branch, repoURL, fullDir, err)
+	}
+	return nil
+}
+
+func fetch(repo *git.Repository) error {
+	err := repo.Fetch(&git.FetchOptions{
+		RemoteName: "origin",
+		Progress:   os.Stdout,
+	})
+	if err != nil {
+		if !strings.Contains(err.Error(), git.NoErrAlreadyUpToDate.Error()) {
+			return fmt.Errorf("failed running fetch, error: %v", err)
+		}
 	}
 	return nil
 }

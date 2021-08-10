@@ -32,6 +32,7 @@ import (
 	"github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/dao-contracts/dao-go"
 	"github.com/hypha-dao/document-graph/docgraph"
+	"github.com/hypha-dao/envctl/contract/tlostoseeds"
 	"github.com/hypha-dao/envctl/daobot"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/hypha-dao/envctl/pretend"
@@ -47,7 +48,13 @@ var populatePretendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		e.DefaultPause("Warming up...")
-		_, err := dao.CreateRoot(e.E().X, e.E().A, e.E().Contract)
+		fmt.Printf("Resetting %v contract...\n", e.E().Exchange)
+		exchange := tlostoseeds.NewTlosToSeedsContract(e.EOS, string(e.E().Exchange))
+		_, err := exchange.Reset()
+		if err != nil {
+			return fmt.Errorf("failed resetting %v contract, error: %v ", exchange.ContractName, err)
+		}
+		_, err = dao.CreateRoot(e.E().X, e.E().A, e.E().Contract)
 		if err != nil {
 			return fmt.Errorf("cannot create root document for pretend environment: %v ", err)
 		}
