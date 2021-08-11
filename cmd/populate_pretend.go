@@ -88,16 +88,16 @@ var populatePretendCmd = &cobra.Command{
 			return fmt.Errorf("cannot add periods: %v ", err)
 		}
 
-		err = daobot.EnrollMembers(e.E().X, e.E().A, e.E().Contract)
-		if err != nil {
-			return fmt.Errorf("cannot create pretend environment: %v ", err)
-		}
+		// err = daobot.EnrollMembers(e.E().X, e.E().A, e.E().Contract)
+		// if err != nil {
+		// 	return fmt.Errorf("cannot create pretend environment: %v ", err)
+		// }
 
-		d, err := createPretend(e.E().X, e.E().A, e.E().Contract, e.E().TelosDecide, e.E().User)
-		if err != nil {
-			return fmt.Errorf("cannot create pretend environment: %v ", err)
-		}
-		fmt.Println("Pretend environment successfully created; assignment document is	: ", d.Hash.String())
+		// d, err := createPretend(e.E().X, e.E().A, e.E().Contract, e.E().TelosDecide, e.E().User)
+		// if err != nil {
+		// 	return fmt.Errorf("cannot create pretend environment: %v ", err)
+		// }
+		// fmt.Println("Pretend environment successfully created; assignment document is	: ", d.Hash.String())
 		return nil
 	},
 }
