@@ -1,0 +1,85 @@
+Contract: dao.hypha
+DAO: dao.hypha
+HusdToken: husd.hypha
+HyphaToken: token.hypha
+HvoiceToken: voice.hypha
+Bank: bank.hypha
+Events: publsh.hypha
+Exchange: tlosto.seeds
+Pause: 1s
+VotingPeriodDuration: 16m
+PayPeriodDuration: 1h
+RootHash: 52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91
+EosioEndpoint: http://localhost:8888
+DAOHome: /home/sebastian/vsc-workspace/hypha-dao-contracts
+BackendConfigDir: /home/runner/work/dho-web-client/dho-web-client/envctl/dho-backend-env
+UserAccount: johnnyhypha1
+backend-init-settings:
+- name: checkout-repos
+  config:
+    base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
+  data:
+    - url: https://github.com/hypha-dao/dao-contracts
+      branch: feature/update-seeds-exchange-artifact
+- name: build-contracts
+  config:
+    base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
+  data:
+    - name: dao-contracts
+- name: deploy
+  config:
+    base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos/dao-contracts
+  data:
+    - path: build/dao/
+      file-name: dao
+      account: dao.hypha
+    - path: dao-go/artifacts/treasury
+      file-name: treasury
+      account: bank.hypha
+    - path: dao-go/artifacts/monitor
+      file-name: monitor
+      account: publsh.hypha
+    - path: dao-go/artifacts/decide
+      file-name: decide
+      account: trailservice
+    - path: dao-go/artifacts/token
+      file-name: token
+      account: husd.hypha
+      supply: 1000000000.00 HUSD
+    - path: dao-go/artifacts/token
+      file-name: token
+      account: token.hypha
+      supply: 1000000000.00 HYPHA
+    - path: dao-go/artifacts/voice
+      file-name: voice
+      account: voice.hypha
+    - path: dao-go/artifacts/seedsexchg
+      file-name: seedsexchg
+      account: tlosto.seeds
+- name: hvoice
+  data:
+  - contract: voice.hypha
+    issuer: dao.hypha
+    max-supply: -1.00 HVOICE
+    decay-period: 1
+    decay-per-period: 100000
+- name: accounts
+  config:
+    create: true
+  data:
+    - name: mem0.hypha
+      total: 5
+    - name: johnnyhypha0
+      total: 1
+# frontend-init-settings:
+#   - name: checkout-repos
+#     config:
+#       base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
+#     data:
+#       - url: https://github.com/hypha-dao/dho-web-client
+#         branch: experimental/envctl-test
+#   - name: run-apps
+#     data:
+#       - path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos/dho-web-client
+#         env-file: /home/sebastian/vsc-workspace/envctl/dho-frontend-env/dho.env
+#         port: 8085
