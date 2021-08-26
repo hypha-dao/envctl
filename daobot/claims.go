@@ -3,6 +3,7 @@ package daobot
 import (
 	"context"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/document-graph/docgraph"
 	"github.com/hypha-dao/envctl/e"
@@ -26,7 +27,7 @@ func ClaimNextPeriod(ctx context.Context, api *eos.API, contract, claimer eos.Ac
 		}),
 	}}
 
-	trxID, err := e.ExecWithRetry(ctx, api, actions)
+	trxID, err := eostest.ExecWithRetry(ctx, api, actions)
 
 	if err != nil {
 		e.Pause(pretend.PayPeriodDuration(), "", "Waiting for a period to lapse")
@@ -42,7 +43,7 @@ func ClaimNextPeriod(ctx context.Context, api *eos.API, contract, claimer eos.Ac
 			}),
 		}}
 
-		trxID, err = e.ExecWithRetry(ctx, api, actions)
+		trxID, err = eostest.ExecWithRetry(ctx, api, actions)
 	}
 
 	return trxID, err

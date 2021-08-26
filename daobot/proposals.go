@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/dfuse-io/logging"
+	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
 	dao "github.com/hypha-dao/dao-contracts/dao-go"
 	"github.com/hypha-dao/document-graph/docgraph"
@@ -106,7 +107,7 @@ func proposeAndPass(ctx context.Context, api *eos.API,
 		},
 		ActionData: eos.NewActionData(proposal)}}
 
-	trxID, err := e.ExecWithRetry(ctx, api, actions)
+	trxID, err := eostest.ExecWithRetry(ctx, api, actions)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("error proposeAndPass: %v", err)
 	}

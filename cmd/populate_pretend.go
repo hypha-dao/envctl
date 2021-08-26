@@ -29,10 +29,12 @@ import (
 	"strconv"
 	"time"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
+	"github.com/eoscanada/eos-go/system"
 	"github.com/hypha-dao/dao-contracts/dao-go"
 	"github.com/hypha-dao/document-graph/docgraph"
-	"github.com/hypha-dao/envctl/contract/tlostoseeds"
+	"github.com/hypha-dao/envctl/contract/exchange"
 	"github.com/hypha-dao/envctl/daobot"
 	"github.com/hypha-dao/envctl/e"
 	"github.com/hypha-dao/envctl/pretend"
@@ -48,11 +50,17 @@ var populatePretendCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		e.DefaultPause("Warming up...")
-		fmt.Printf("Resetting %v contract...\n", e.E().Exchange)
-		exchange := tlostoseeds.NewTlosToSeedsContract(e.EOS, string(e.E().Exchange))
-		_, err := exchange.Reset()
+		fmt.Printf("Setting bank permissions...\n")
+		err := setBankPermissions()
 		if err != nil {
-			return fmt.Errorf("failed resetting %v contract, error: %v ", exchange.ContractName, err)
+			return fmt.Errorf("failed setting bank permissions, error: %v", err)
+		}
+
+		fmt.Printf("Initializing %v contract...\n", e.E().Exchange)
+		exchange := exchange.NewSeedsExchange(e.EOS, string(e.E().Exchange))
+		err = exchange.LoadSeedsTablesFromProd(viper.GetString("prod-eosio-endpoint"))
+		if err != nil {
+			return fmt.Errorf("failed initializing %v contract, error: %v", e.E().Exchange, err)
 		}
 		_, err = dao.CreateRoot(e.E().X, e.E().A, e.E().Contract)
 		if err != nil {
@@ -88,16 +96,22 @@ var populatePretendCmd = &cobra.Command{
 			return fmt.Errorf("cannot add periods: %v ", err)
 		}
 
-		// err = daobot.EnrollMembers(e.E().X, e.E().A, e.E().Contract)
+		// fmt.Println("Adding start edge to root document...")
+		// _, err = docgraph.CreateEdge(e.E().X, e.E().A, e.E().Contract, e.E().Contract, root.Hash, periods[0].Hash, eos.Name("start"))
 		// if err != nil {
-		// 	return fmt.Errorf("cannot create pretend environment: %v ", err)
+		// 	return fmt.Errorf("failed adding start edge: %v,  to root document: %v, error: %v", root.Hash, periods[0].Hash, err)
 		// }
+		fmt.Println("Enrolling members...")
+		err = daobot.EnrollMembers(e.E().X, e.E().A, e.E().Contract)
+		if err != nil {
+			return fmt.Errorf("failed enrolling members: %v ", err)
+		}
 
-		// d, err := createPretend(e.E().X, e.E().A, e.E().Contract, e.E().TelosDecide, e.E().User)
-		// if err != nil {
-		// 	return fmt.Errorf("cannot create pretend environment: %v ", err)
-		// }
-		// fmt.Println("Pretend environment successfully created; assignment document is	: ", d.Hash.String())
+		d, err := createPretend(e.E().X, e.E().A, e.E().Contract, e.E().TelosDecide, e.E().User)
+		if err != nil {
+			return fmt.Errorf("cannot create pretend environment: %v ", err)
+		}
+		fmt.Println("Pretend environment successfully created; assignment document is	: ", d.Hash.String())
 		return nil
 	},
 }
@@ -109,6 +123,7 @@ func init() {
 // createPretend returns the assignment document
 func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, member eos.AccountName) (docgraph.Document, error) {
 
+	fmt.Println("Creating Role...")
 	role, err := daobot.CreateRole(ctx, api, contract, telosDecide, member, []byte(pretend.Role))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create role: %v", err)
@@ -116,6 +131,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Role document successfully created	: ", role.Hash.String())
 	e.DefaultPause("Building a block...")
 
+	fmt.Println("Creating assignment...")
 	roleAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("role"), eos.Name("assignment"), []byte(pretend.Assignment))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create assignment: %v", err)
@@ -123,6 +139,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Created role assignment document	: ", roleAssignment.Hash.String())
 	e.Pause(pretend.PayPeriodDuration()+e.E().Pause, "", "Waiting for a period to lapse")
 
+	fmt.Println("Claiming period...")
 	_, err = daobot.ClaimNextPeriod(ctx, api, contract, member, roleAssignment)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to claim pay on assignment: %v %v", roleAssignment.Hash.String(), err)
@@ -130,6 +147,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Claimed pay on the assignment 		: ", roleAssignment.Hash.String())
 	e.DefaultPause("Building a block...")
 
+	fmt.Println("Creating Payout...")
 	payAmt, _ := eos.NewAssetFromString("1000.00 USD")
 	payout, err := daobot.CreatePayout(ctx, api, contract, telosDecide, member, member, payAmt, 50, []byte(pretend.Payout))
 	if err != nil {
@@ -138,6 +156,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Created payout document	: ", payout.Hash.String())
 	e.DefaultPause("Building a block...")
 
+	fmt.Println("Creating badge...")
 	badge, err := daobot.CreateBadge(ctx, api, contract, telosDecide, member, []byte(pretend.Badge))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create badge: %v", err)
@@ -145,6 +164,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Created badge document	: ", badge.Hash.String())
 	e.DefaultPause("Building a block...")
 
+	fmt.Println("Creating badge assignment...")
 	badgeAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("badge"), eos.Name("assignbadge"), []byte(pretend.BadgeAssignment))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create badge assignment: %v", err)
@@ -152,4 +172,38 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 	fmt.Println("Created badge assignment document	: ", badgeAssignment.Hash.String())
 
 	return roleAssignment, nil
+}
+
+func setBankPermissions() error {
+
+	bankPublicKey, err := toPublic(eostest.DefaultKey())
+	if err != nil {
+		return fmt.Errorf("unable to derive public key: %v %v", eostest.DefaultKey(), err)
+	}
+
+	bankPermissionActions := []*eos.Action{system.NewUpdateAuth(e.E().Bank,
+		"active",
+		"owner",
+		eos.Authority{
+			Threshold: 1,
+			Keys: []eos.KeyWeight{{
+				PublicKey: bankPublicKey,
+				Weight:    1,
+			}},
+			Accounts: []eos.PermissionLevelWeight{
+				{
+					Permission: eos.PermissionLevel{
+						Actor:      e.E().DAO,
+						Permission: "eosio.code",
+					},
+					Weight: 1,
+				}},
+			Waits: []eos.WaitWeight{},
+		}, "owner")}
+
+	_, err = e.ExecWithRetry(e.E().X, e.E().A, bankPermissionActions)
+	if err != nil {
+		return fmt.Errorf("unable to update bank account permissions: %v %v", viper.GetString("Bank"), err)
+	}
+	return nil
 }

@@ -46,11 +46,24 @@ func (m *Deploy) Handle(data map[interface{}]interface{}, config map[interface{}
 		if err != nil {
 			return fmt.Errorf("failed to parse asset: %v error %v", supply, err)
 		}
-		_, err = m.TokenContract.CreateToken(account, account, asset, false)
+		issuer := account
+		if issuerI, ok := data["issuer"]; ok {
+			issuer = issuerI.(string)
+		}
+		_, err = m.TokenContract.CreateToken(account, issuer, asset, false)
 		if err != nil {
 			return fmt.Errorf("failed to create token: %v, supply: %v error %v", account, supply, err)
 		}
 		fmt.Printf("Created token: %v, supply: %v\n", account, supply)
+
+		if issue, ok := data["issue"]; ok {
+			_, err = m.TokenContract.Issue(account, issuer, issue.(string), "Initial issue")
+			if err != nil {
+				return fmt.Errorf("failed to issue token: %v, issue amount: %v error %v", account, supply, err)
+			}
+			fmt.Printf("Issueed token: %v, issue amount: %v\n", account, issue)
+		}
+
 	}
 	return nil
 }

@@ -55,6 +55,7 @@ func E() *Environment {
 			A:           eos.New(viper.GetString("EosioEndpoint")),
 			X:           context.Background(),
 			AppName:     viper.GetString("AppName"),
+			Bank:        eos.AN(viper.GetString("Bank")),
 			Contract:    eos.AN(viper.GetString("Contract")),
 			DAO:         eos.AN(viper.GetString("DAO")),
 			TelosDecide: eos.AN("trailservice"),
@@ -78,6 +79,7 @@ func DefaultProgressBar(counter int, prefix string) *progressbar.ProgressBar {
 		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionSetWidth(90),
+		progressbar.OptionClearOnFinish(),
 		// progressbar.OptionShowIts(),
 		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", prefix)),
 		progressbar.OptionSetTheme(progressbar.Theme{
@@ -99,6 +101,7 @@ func Pause(seconds time.Duration, headline, prefix string) {
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionSetWidth(90),
 		// progressbar.OptionShowIts(),
+		progressbar.OptionClearOnFinish(),
 		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", prefix)),
 		progressbar.OptionSetTheme(progressbar.Theme{
 			Saucer:        "[green]=[reset]",
@@ -124,6 +127,7 @@ func DefaultPause(headline string) {
 		progressbar.OptionSetWriter(ansi.NewAnsiStdout()),
 		progressbar.OptionEnableColorCodes(true),
 		progressbar.OptionSetWidth(90),
+		progressbar.OptionClearOnFinish(),
 		// progressbar.OptionShowIts(),
 		progressbar.OptionSetDescription("[cyan]"+fmt.Sprintf("%20v", "")),
 		progressbar.OptionSetTheme(progressbar.Theme{

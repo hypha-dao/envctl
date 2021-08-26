@@ -29,6 +29,7 @@ import (
 	"strconv"
 	"time"
 
+	eostest "github.com/digital-scarcity/eos-go-test"
 	"github.com/eoscanada/eos-go"
 	"github.com/hypha-dao/daoctl/models"
 	"github.com/hypha-dao/document-graph/docgraph"
@@ -119,7 +120,7 @@ func addPeriods(ctx context.Context, api *eos.API, daoContract eos.AccountName,
 		//startTime = eos.TimePoint(predecessor.StartTime.Add(periodDuration).UnixNano() / 1000)
 		// marker = marker.Add(periodDuration).Add(time.Millisecond)
 
-		_, err := e.ExecWithRetry(ctx, api, []*eos.Action{&addPeriodAction})
+		_, err := eostest.ExecWithRetry(ctx, api, []*eos.Action{&addPeriodAction})
 		if err != nil {
 			return periods, fmt.Errorf("cannot add period: %v", err)
 		}

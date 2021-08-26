@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go v0.60.0 // indirect
 	github.com/bronze1man/go-yaml2json v0.0.0-20150129175009-f6f64b738964
 	github.com/dfuse-io/logging v0.0.0-20210109005628-b97a57253f70
-	github.com/digital-scarcity/eos-go-test v0.0.0-20210421164317-b5d51aa34fbb
+	github.com/digital-scarcity/eos-go-test v0.0.0-20210823154044-8e78e165bb94
 	github.com/eoscanada/eos-go v0.9.1-0.20200805141443-a9d5402a7bc5
 	github.com/eoscanada/eosc v1.4.0
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/google/go-cmp v0.5.1 // indirect
-	github.com/hypha-dao/dao-contracts/dao-go v0.0.0-20210408021016-878ebc6d5d0d
+	github.com/hypha-dao/dao-contracts/dao-go v0.0.0-20210824213407-fc53bf961569
 	github.com/hypha-dao/daoctl v0.4.2-0.20210408023659-31ca5bcb62c4
 	github.com/hypha-dao/document-graph/docgraph v0.0.0-20210408001022-43385207b5d0
 	github.com/k0kubun/go-ansi v0.0.0-20180517002512-3bf9e2903213
@@ -38,8 +38,8 @@ require (
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )
 
-// replace github.com/hypha-dao/dao-contracts/dao-go => ../dao-contracts/dao-go
+// replace github.com/hypha-dao/dao-contracts/dao-go => ../hypha-dao-contracts/dao-go
 
-// replace github.com/hypha-dao/document-graph/docgraph => ../dao-contracts/document-graph/docgraph
+// replace github.com/hypha-dao/document-graph/docgraph => ../document-graph/docgraph
 
-// replace github.com/digital-scarcity/eos-go-test => ../../digital-scarcity/eos-go-test
+// replace github.com/digital-scarcity/eos-go-test => ../eos-go-test

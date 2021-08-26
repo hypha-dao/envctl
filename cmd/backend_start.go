@@ -25,6 +25,7 @@ package cmd
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hypha-dao/envctl/domain"
 	"github.com/hypha-dao/envctl/e"
@@ -49,14 +50,16 @@ var backendStartCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			zlog.Info("Backend services have been destroyed. Restarting...")
+			fmt.Println("Backend services have been destroyed. Restarting...")
 		}
 		fmt.Println("Starting backend services...")
 		err := bkd.Start()
 		if err != nil {
 			return err
 		}
-		zlog.Info("Backend services started. Initializing...")
+		fmt.Println("Waiting for backend services to finish their setup...")
+		time.Sleep(time.Minute)
+		fmt.Println("Backend services started. Initializing...")
 		initOp := handler.InitializeOp_Start
 		if restart {
 			initOp = handler.InitializeOp_Restart

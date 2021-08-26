@@ -6,11 +6,14 @@ HvoiceToken: voice.hypha
 Bank: bank.hypha
 Events: publsh.hypha
 Exchange: tlosto.seeds
+Escrow: escrow.seeds
 Pause: 1s
-VotingPeriodDuration: 16m
-PayPeriodDuration: 1h
+PeriodCount: 40
+VotingPeriodDuration: 1m
+PayPeriodDuration: 20s
 RootHash: 52a7ff82bd6f53b31285e97d6806d886eefb650e79754784e9d923d3df347c91
 EosioEndpoint: http://localhost:8888
+prod-eosio-endpoint: https://api.telos.kitchen
 DAOHome: /home/sebastian/vsc-workspace/hypha-dao-contracts
 BackendConfigDir: /home/runner/work/dho-web-client/dho-web-client/envctl/dho-backend-env
 UserAccount: johnnyhypha1
@@ -46,16 +49,32 @@ backend-init-settings:
       file-name: token
       account: husd.hypha
       supply: 1000000000.00 HUSD
+      issuer: bank.hypha
     - path: dao-go/artifacts/token
       file-name: token
       account: token.hypha
       supply: 1000000000.00 HYPHA
+      issuer: dao.hypha
+    - path: dao-go/artifacts/token
+      file-name: token
+      account: token.seeds
+      supply: 1000000000.0000 SEEDS
+      issuer: dao.hypha
+      issue: 1000000000.0000 SEEDS
+    - path: dao-go/artifacts/token
+      file-name: token
+      account: eosio.token
+      supply: 1000000000.0000 TLOS
+      issuer: dao.hypha
     - path: dao-go/artifacts/voice
       file-name: voice
       account: voice.hypha
     - path: dao-go/artifacts/seedsexchg
       file-name: seedsexchg
       account: tlosto.seeds
+    - path: dao-go/artifacts/escrow
+      file-name: escrow
+      account: escrow.seeds
 - name: hvoice
   data:
   - contract: voice.hypha
@@ -71,15 +90,3 @@ backend-init-settings:
       total: 5
     - name: johnnyhypha0
       total: 1
-# frontend-init-settings:
-#   - name: checkout-repos
-#     config:
-#       base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
-#     data:
-#       - url: https://github.com/hypha-dao/dho-web-client
-#         branch: experimental/envctl-test
-#   - name: run-apps
-#     data:
-#       - path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos/dho-web-client
-#         env-file: /home/sebastian/vsc-workspace/envctl/dho-frontend-env/dho.env
-#         port: 8085
