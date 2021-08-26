@@ -12,7 +12,6 @@ import (
 	"github.com/eoscanada/eos-go"
 	dao "github.com/hypha-dao/dao-contracts/dao-go"
 	"github.com/hypha-dao/document-graph/docgraph"
-	"github.com/hypha-dao/envctl/e"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -112,7 +111,7 @@ func proposeAndPass(ctx context.Context, api *eos.API,
 		return docgraph.Document{}, fmt.Errorf("error proposeAndPass: %v", err)
 	}
 	zlog.Info("Proposed. Transaction ID: " + trxID)
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	return closeLastProposal(ctx, api, contract, telosDecide, proposer)
 }
@@ -130,19 +129,19 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 	if err == nil {
 		zlog.Info("Member voted : " + string(member))
 	}
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	_, err = dao.VotePass(ctx, api, contract, telosDecide, eos.AN("alice"), &proposal)
 	if err == nil {
 		zlog.Info("Member voted : alice")
 	}
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	_, err = dao.VotePass(ctx, api, contract, telosDecide, eos.AN("johnnyhypha1"), &proposal)
 	if err == nil {
 		zlog.Info("Member voted : johnnyhypha1")
 	}
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	index := 1
 	for index < 5 {
@@ -154,7 +153,7 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 		if err != nil {
 			return docgraph.Document{}, fmt.Errorf("error voting %v", err)
 		}
-		e.DefaultPause("Building a block...")
+		// e.DefaultPause("Building a block...")
 		zlog.Info("Member voted : " + string(memberNameIn))
 		index++
 	}
@@ -170,7 +169,9 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 	}
 
 	votingPause := time.Duration((5 + votingPeriodDuration.Impl.(int64)) * 1000000000)
-	e.Pause(votingPause, "Waiting on voting period to lapse: "+strconv.Itoa(int(5+votingPeriodDuration.Impl.(int64)))+" seconds", "")
+	fmt.Println("Waiting on voting period to lapse: ", strconv.Itoa(int(5+votingPeriodDuration.Impl.(int64))), " seconds")
+	time.Sleep(votingPause)
+	// e.Pause(votingPause, "Waiting on voting period to lapse: "+strconv.Itoa(int(5+votingPeriodDuration.Impl.(int64)))+" seconds", "")
 
 	zlog.Info("Closing proposal: " + proposal.Hash.String())
 	_, err = dao.CloseProposal(ctx, api, contract, member, proposal.Hash)
@@ -178,7 +179,7 @@ func closeLastProposal(ctx context.Context, api *eos.API, contract, telosDecide,
 		return docgraph.Document{}, fmt.Errorf("cannot close proposal %v", err)
 	}
 
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 	passedProposal, err := docgraph.GetLastDocumentOfEdge(ctx, api, contract, eos.Name("passedprops"))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("error retrieving passed proposal document %v", err)
@@ -220,7 +221,7 @@ func CreateAssignment(ctx context.Context, api *eos.API, contract, telosDecide, 
 		return docgraph.Document{}, fmt.Errorf("cannot unmarshal error: %v ", err)
 	}
 
-	e.DefaultPause("Building block...")
+	// e.DefaultPause("Building block...")
 
 	// e.g. a "role" is parent to a "role assignment"
 	// e.g. a "badge" is parent to a "badge assignment"

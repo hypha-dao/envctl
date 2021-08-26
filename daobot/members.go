@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	dao "github.com/hypha-dao/dao-contracts/dao-go"
-	"github.com/hypha-dao/envctl/e"
 	"go.uber.org/zap"
 
 	"github.com/eoscanada/eos-go"
@@ -49,14 +48,14 @@ func enrollMember(ctx context.Context, api *eos.API, contract, member eos.Accoun
 	}
 	zlog.Info("Completed the apply transaction: " + trxID)
 
-	e.DefaultPause("Building block...")
+	// e.DefaultPause("Building block...")
 
 	_, err = dao.Enroll(ctx, api, contract, contract, member)
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("error enrolling %v", err)
 	}
 
-	e.DefaultPause("Building block...")
+	// e.DefaultPause("Building block...")
 	memberDoc, err := docgraph.GetLastDocumentOfEdge(ctx, api, contract, "member")
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("error enrolling %v", err)

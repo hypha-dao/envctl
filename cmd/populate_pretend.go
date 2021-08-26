@@ -49,7 +49,7 @@ var populatePretendCmd = &cobra.Command{
 	Long:  "populates with the known Pretend environment",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		e.DefaultPause("Warming up...")
+		// e.DefaultPause("Warming up...")
 		fmt.Printf("Setting bank permissions...\n")
 		err := setBankPermissions()
 		if err != nil {
@@ -129,15 +129,16 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to create role: %v", err)
 	}
 	fmt.Println("Role document successfully created	: ", role.Hash.String())
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	fmt.Println("Creating assignment...")
 	roleAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("role"), eos.Name("assignment"), []byte(pretend.Assignment))
 	if err != nil {
 		return docgraph.Document{}, fmt.Errorf("unable to create assignment: %v", err)
 	}
-	fmt.Println("Created role assignment document	: ", roleAssignment.Hash.String())
-	e.Pause(pretend.PayPeriodDuration()+e.E().Pause, "", "Waiting for a period to lapse")
+	fmt.Println("Created role assignment document	: ", roleAssignment.Hash.String(), "Waiting for period to lapse: ", pretend.PayPeriodDuration())
+	time.Sleep(pretend.PayPeriodDuration())
+	// e.Pause(pretend.PayPeriodDuration()+e.E().Pause, "", "Waiting for a period to lapse")
 
 	fmt.Println("Claiming period...")
 	_, err = daobot.ClaimNextPeriod(ctx, api, contract, member, roleAssignment)
@@ -145,7 +146,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to claim pay on assignment: %v %v", roleAssignment.Hash.String(), err)
 	}
 	fmt.Println("Claimed pay on the assignment 		: ", roleAssignment.Hash.String())
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	fmt.Println("Creating Payout...")
 	payAmt, _ := eos.NewAssetFromString("1000.00 USD")
@@ -154,7 +155,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to create payout: %v", err)
 	}
 	fmt.Println("Created payout document	: ", payout.Hash.String())
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	fmt.Println("Creating badge...")
 	badge, err := daobot.CreateBadge(ctx, api, contract, telosDecide, member, []byte(pretend.Badge))
@@ -162,7 +163,7 @@ func createPretend(ctx context.Context, api *eos.API, contract, telosDecide, mem
 		return docgraph.Document{}, fmt.Errorf("unable to create badge: %v", err)
 	}
 	fmt.Println("Created badge document	: ", badge.Hash.String())
-	e.DefaultPause("Building a block...")
+	// e.DefaultPause("Building a block...")
 
 	fmt.Println("Creating badge assignment...")
 	badgeAssignment, err := daobot.CreateAssignment(ctx, api, contract, telosDecide, member, eos.Name("badge"), eos.Name("assignbadge"), []byte(pretend.BadgeAssignment))
