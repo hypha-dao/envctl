@@ -23,7 +23,7 @@ backend-init-settings:
     base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
   data:
     - url: https://github.com/hypha-dao/dao-contracts
-      branch: feature/update-seeds-exchange-artifact
+      branch: develop
 - name: build-contracts
   config:
     base-path: /home/runner/work/dho-web-client/dho-web-client/envctl-data/repos
